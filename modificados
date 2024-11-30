@@ -1,0 +1,73 @@
+# La degeneracion del upper es el 2*F+1 donde F es el ultimo quantum number...bueno es saberlo.
+
+###JPL inconsistencies
+
+Quitar 84001 del catdir.
+ 84001 CH2Cl2       752701 7.1439 6.9586 6.6947 6.2430 5.7916 5.3405 4.8901 1* 
+  738593.8028  0.0950 -8.9706 3  844.9585*75  84001230588 683 187  87 582 187  
+ejemplo de c084001.cat
+que sifginica el * ??? *=36???
+Deberiamos quitar estas transiciones????
+
+mv c027004.cat c027004.backup
+sed 's/26002/27004/g' c027004.backup > c027004.cat
+
+mv c036002.cat c036002.backup
+sed 's/36006/36002/g' c036002.backup > c036002.cat
+
+mv c042006.cat c042006.backup
+sed 's/42508/42006/g' c042006.backup > c042006.cat
+
+mv c046014.cat c046014.backup
+sed 's/47014/46014/g' c046014.backup > c046014.cat
+
+# Falta espacion entre el ID_TAG y el QNMFT on c039003.cat
+mv c039003.cat c039003.backup
+sed 's/39003303/39003 303/g' c039003.backup > c039003.cat
+
+# c032001.cat c032002.cat c034001.cat
+# Las primeras lineas no tienen numeros cuanticos con sentido
+# Y hay que separar el ID_TAG y el QNMFT.
+# Ambos ficheros son practicamente iguales 
+# Y en c032002.cat hay que cambiar el ID_TAG de 32001 a 32002
+mv c032001.cat c032001.backup
+tail -n +91 c032001.backup | sed 's/320011304/32001 304/g' > c032001.cat
+
+mv c032002.cat c032002.backup
+tail -n +91 c032002.backup | sed 's/320011304/32002 304/g' > c032002.cat
+
+mv c034001.cat c034001.backup
+tail -n +181 c034001.backup | sed 's/340011304/34001 304/g' > c034001.cat
+
+# Una linea mal formateada en c039003.cat
+   42064.1404  0.0045 -5.5784 3    0.0000  3  39003 303 1 0 1        0 0 0 
+   49615.8517  0.0045 -4.6515 3    0.0000  3  39003 303 1 1 1        0 0 0               
+debe ser
+   42064.1404  0.0045 -5.5784 3    0.0000  3  39003 303 1 0 1       0 0 0 
+   49615.8517  0.0045 -4.6515 3    0.0000  3  39003 303 1 1 1       0 0 0               
+
+
+# Faltan espacios al final del fichero c028010.cat
+cp c028010.cat c028010.backup
+#sed 's/39 2 3/39 2 3       /g' c028010.backup > c028010.cat
+Este comando no funciona. Cambiar a mano en la linea final.
+
+# Added NH3hf from and old JPL version
+# Added line to catdir.cat  (set to 17009 to avoid future conflicts)
+ 17009 NH3hf           446 2.7627 2.5780 2.3162 1.8725 1.4410 1.0512 0.7322 3
+ cp ../c017009.cat .
+ sed 's/17002/17009/g' ../c017009.cat > c017009.cat
+
+# Duplicated entry. Remove 
+ 44009 N2O            1926 2.7509 2.5929 2.3996 2.0961 1.7962 1.4975 1.2011 3* 
+ 44012 N2O            1926 2.7509 2.5929 2.3996 2.0961 1.7962 1.4975 1.2011 3* 
+
+#############################################################################################################################
+# SOLVED
+#mv c038002.cat c038002.backup
+#sed 's/38007/38002/g' c038002.backup > c038002.cat
+#mv c025002.cat c025002.backup
+#sed 's/24001/25002/g' c025002.backup > c025002.cat
+# File c043005.cat is empty
+#mv ../catdir.cat ../catdir.cat_backup
+#more ../catdir.cat_backup | grep -v 43005 > ../catdir.cat
