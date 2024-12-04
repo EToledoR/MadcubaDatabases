@@ -3,6 +3,41 @@ import os
 import wget  # requires pip install wget
 import numpy as np
 import matplotlib.pyplot as plt
+from scipy.interpolate import PchipInterpolator
+
+# Sanity check: Verificar monotonía decreciente
+def check_monotonicity(values, line_number):
+    """
+    Verifica si los valores son monotonamente decrecientes.
+    Si no lo son, corrige los valores reemplazando los incorrectos por None.
+    """
+    corrected_values = values.copy()
+    violations = []  # Para registrar los índices que rompen la monotonía
+
+    # Limpiar valores no numéricos
+    cleaned_values = [
+        (i, v) for i, v in enumerate(corrected_values) if v not in [None, '---', np.nan]
+    ]
+
+    if 4.1069 in corrected_values:
+        print('Array limpio: ', cleaned_values)
+    # Extraer solo los valores válidos y sus índices
+    valid_indices, valid_values = zip(*cleaned_values) if cleaned_values else ([], [])
+
+    # Comprobar monotonía decreciente
+    for i in range(1, len(valid_values)):
+        if valid_values[i] > valid_values[i-1]:  # Monotonía rota
+            violations.append(valid_indices[i])
+            corrected_values[valid_indices[i]] = None  # Marcamos como hueco
+
+
+    #for i in range(1, len(values)):
+        #if corrected_values[i] is not None and corrected_values[i-1] is not None:
+            #if corrected_values[i] > corrected_values[i-1]:  # Monotonía rota
+                #violations.append(i)
+                #corrected_values[i] = None  # Marcamos como hueco
+
+    return corrected_values, violations
 
 fpartition = open('partition_function.html',"r")
 fpartitionlines = fpartition.readlines()
@@ -50,6 +85,8 @@ with open('output_partition_function.html', 'w') as outfile:
     x_new=np.array([300.0,225.0,150.0,75.0,37.5,18.75,9.375])
     x_new=np.log10(x_new)
 
+    sanity_check_violations = []
+
     # LOOP HERE
     # Eduardo Toledo 2 Dec 2024
     # Process each line in the original partition file
@@ -94,8 +131,17 @@ with open('output_partition_function.html', 'w') as outfile:
                      #print(y)
                      #print(x)
 
+
+                     # Correct the partition array from all the violations of monotonicity
+                     if tag == 'e033511':
+                         print('Checking monotonicity: ', partition_array)
+                     corrected_partition_array, violations = check_monotonicity(partition_array, fpartitionline)
+                     if violations:
+                         sanity_check_violations.append((fpartitionline.strip(), violations))
+
                      # Fill gaps
-                     filled_partition_array = partition_array.copy()
+                     filled_partition_array = corrected_partition_array.copy()
+                     #filled_partition_array = partition_array.copy()
                      for i, val in enumerate(partition_array):
                          if val is None:
                              # Get the temperature value correspondent
@@ -112,54 +158,55 @@ with open('output_partition_function.html', 'w') as outfile:
 
                      # Make the filled_partition_array a numpy array to play with it
                      filled_partition_array = np.array(
-                         [float(val) if val != '---' else np.nan for val in filled_partition_array], dtype=np.float64
+                         #[float(val) if val != '---' else np.nan for val in filled_partition_array], dtype=np.float64
+                         #[float(val) if val is not None else np.nan for val in filled_partition_array], dtype=np.float64
+                         [float(val) if val not in [None, '---'] else np.nan for val in filled_partition_array], dtype=np.float64
                      )
 
                      # Interpolate and extrapolate
+                     # Interpolate using PCHIP (monotonic interpolation)
                      if np.any(np.isnan(filled_partition_array)):
                          indices = np.arange(len(filled_partition_array))
+                         valid_indices = indices[~np.isnan(filled_partition_array)]
+                         valid_values = filled_partition_array[~np.isnan(filled_partition_array)]
 
-                         # Interpolation when possible
-                         interpolated_array = np.interp(
-                             indices,  # Índices completos
-                             indices[~np.isnan(filled_partition_array)],  # Índices no NaN
-                             filled_partition_array[~np.isnan(filled_partition_array)]  # Valores no NaN
-                         )
+                         # PCHIP interpolator (ensures monotonicity)
+                         pchip_interpolator = PchipInterpolator(valid_indices, valid_values, extrapolate=False)
+                         interpolated_array = pchip_interpolator(indices)
 
-                         # Extrapolation for missing values at the beginning
-                         first_valid_index = np.where(~np.isnan(filled_partition_array))[0][0]
-                         if first_valid_index > 0:
-                             # Use first two valid values to compute slope for extrapolation
-                             second_valid_index = np.where(~np.isnan(filled_partition_array))[0][1]
-                             slope_start = (
-                                 filled_partition_array[second_valid_index] - filled_partition_array[first_valid_index]
-                             ) / (second_valid_index - first_valid_index)
-                             for i in range(first_valid_index):
-                                 interpolated_array[i] = (
-                                 filled_partition_array[first_valid_index] - slope_start * (first_valid_index - i)
-                             )
+                         # Handle extrapolation manually
+                         first_valid_index = valid_indices[0]
+                         last_valid_index = valid_indices[-1]
 
-                         # Extrapolation for missing values at the end
-                         last_valid_index = np.where(~np.isnan(filled_partition_array))[0][-1]
-                         if last_valid_index < len(filled_partition_array) - 1:
-                             # Use last two valid values to compute slope for extrapolation
-                             second_last_valid_index = np.where(~np.isnan(filled_partition_array))[0][-2]
-                             slope_end = (
-                                 filled_partition_array[last_valid_index] - filled_partition_array[second_last_valid_index]
-                             ) / (last_valid_index - second_last_valid_index)
-                             for i in range(last_valid_index + 1, len(filled_partition_array)):
-                                 interpolated_array[i] = (
-                                 filled_partition_array[last_valid_index] + slope_end * (i - last_valid_index)
-                             )
+                         # Extrapolate before the first valid index
+                         slope_start = (valid_values[1] - valid_values[0]) / (valid_indices[1] - valid_indices[0])
+                         for i in range(first_valid_index):
+                             interpolated_array[i] = valid_values[0] + slope_start * (i - first_valid_index)
+
+                         # Extrapolate after the last valid index
+                         slope_end = (valid_values[-1] - valid_values[-2]) / (valid_indices[-1] - valid_indices[-2])
+                         for i in range(last_valid_index + 1, len(filled_partition_array)):
+                             interpolated_array[i] = valid_values[-1] + slope_end * (i - last_valid_index)
+
+                         # Ensure monotonicity for extrapolated values
+                         for i in range(1, len(interpolated_array)):
+                             if interpolated_array[i] >= interpolated_array[i-1]:  # Monotonía rota
+                                 interpolated_array[i] = interpolated_array[i-1] - 0.0001
+
                          filled_partition_array = np.round(interpolated_array, 4)
 
                      if tag == 'e033511':
                          print('After completing the values (after interpolation/extrapolation):', filled_partition_array)
 
                      # Format the updated line
+                     #updated_line = (
+                         #f'{fpartitionline[:38]} '
+                         #+ '  '.join([f'{v:.4f}' if v is not None else '---' for v in filled_partition_array])
+                         #+ '\n'
+                     #)
                      updated_line = (
-                         f'{fpartitionline[:24]} '
-                         + '  '.join([f'{v:.4f}' if v is not None else '---' for v in filled_partition_array])
+                         f'{fpartitionline[:38]} '
+                         + ''.join([f'{(f"{v:.4f}" if v is not None else "---"):>13}' for v in filled_partition_array])
                          + '\n'
                      )
                      outfile.write(updated_line)
@@ -194,3 +241,11 @@ with open('output_partition_function.html', 'w') as outfile:
 
     # Write the footer
     outfile.writelines(footer)
+
+    print("Sanity Check Report:")
+    print("=====================")
+    print(f"Total lines with monotonicity issues: {len(sanity_check_violations)}")
+    for line, indices in sanity_check_violations:
+        print(f"Line: {line}")
+        print(f"Indices fixed: {indices}")
+
