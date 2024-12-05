@@ -85,7 +85,10 @@ with open('output_partition_function.html', 'w') as outfile:
     x_new=np.array([300.0,225.0,150.0,75.0,37.5,18.75,9.375])
     x_new=np.log10(x_new)
 
+    # Variables declaration to manage the data for each molecule
     sanity_check_violations = []
+    complete_array = []
+    complete = 0
 
     # LOOP HERE
     # Eduardo Toledo 2 Dec 2024
@@ -135,169 +138,181 @@ with open('output_partition_function.html', 'w') as outfile:
                      # Correct the partition array from all the violations of monotonicity
                      if tag == 'e033511':
                          print('Checking monotonicity: ', partition_array)
-                     corrected_partition_array, violations = check_monotonicity(partition_array, fpartitionline)
-                     if violations:
-                         sanity_check_violations.append((fpartitionline.strip(), violations))
 
-                     # Fill gaps
-                     filled_partition_array = corrected_partition_array.copy()
-                     #filled_partition_array = partition_array.copy()
-                     for i, val in enumerate(partition_array):
-                         if val is None:
-                             # Get the temperature value correspondent
-                             temp_value = temp_labels[i]
-                             # Check if that value exists in the array populated from the efiles.
-                             if temp_value in x:
-                                 # Get the index from x and therefore from y
-                                 idx = x.index(temp_value)
-                                 filled_partition_array[i] = y[idx]
-                             else:
-                                 filled_partition_array[i] = '---'
-                     if tag == 'e033511':
-                         print('After completing the values: ', filled_partition_array)
+                     if all(partition_array[i] not in [None, '---', np.nan] for i in range(2, 9)):
+                         # Si cumplen la condición, añadir a la lista y no procesar
+                         complete_array.append(tag)
+                         complete += 1
+                     else:
+                         corrected_partition_array, violations = check_monotonicity(partition_array, fpartitionline)
+                         if violations:
+                             sanity_check_violations.append((fpartitionline.strip(), violations))
 
-                     # Make the filled_partition_array a numpy array to play with it
-                     filled_partition_array = np.array(
-                         #[float(val) if val != '---' else np.nan for val in filled_partition_array], dtype=np.float64
-                         #[float(val) if val is not None else np.nan for val in filled_partition_array], dtype=np.float64
-                         [float(val) if val not in [None, '---'] else np.nan for val in filled_partition_array], dtype=np.float64
-                     )
+                         # Fill gaps
+                         filled_partition_array = corrected_partition_array.copy()
+                         #filled_partition_array = partition_array.copy()
+                         for i, val in enumerate(partition_array):
+                             if val is None:
+                                 # Get the temperature value correspondent
+                                 temp_value = temp_labels[i]
+                                 # Check if that value exists in the array populated from the efiles.
+                                 if temp_value in x:
+                                     # Get the index from x and therefore from y
+                                     idx = x.index(temp_value)
+                                     filled_partition_array[i] = y[idx]
+                                 else:
+                                     filled_partition_array[i] = '---'
+                         if tag == 'e033511':
+                             print('After completing the values: ', filled_partition_array)
 
-                     # Interpolate and extrapolate
-                     # Interpolate using PCHIP (monotonic interpolation)
-                     if np.any(np.isnan(filled_partition_array)):
-                         indices = np.arange(len(filled_partition_array))
-                         valid_indices = indices[~np.isnan(filled_partition_array)]
-                         valid_values = filled_partition_array[~np.isnan(filled_partition_array)]
-
-                         # PCHIP interpolator (ensures monotonicity)
-                         pchip_interpolator = PchipInterpolator(valid_indices, valid_values, extrapolate=False)
-                         interpolated_array = pchip_interpolator(indices)
-
-                         # Handle extrapolation manually
-                         first_valid_index = valid_indices[0]
-                         last_valid_index = valid_indices[-1]
-
-                         # Extrapolate before the first valid index
-                         slope_start = (valid_values[1] - valid_values[0]) / (valid_indices[1] - valid_indices[0])
-                         for i in range(first_valid_index):
-                             interpolated_array[i] = valid_values[0] + slope_start * (i - first_valid_index)
-
-                         # Extrapolate after the last valid index
-                         slope_end = (valid_values[-1] - valid_values[-2]) / (valid_indices[-1] - valid_indices[-2])
-                         for i in range(last_valid_index + 1, len(filled_partition_array)):
-                             interpolated_array[i] = valid_values[-1] + slope_end * (i - last_valid_index)
-
-                         # Ensure monotonicity for extrapolated values
-                         for i in range(1, len(interpolated_array)):
-                             if interpolated_array[i] >= interpolated_array[i-1]:  # Monotonía rota
-                                 interpolated_array[i] = interpolated_array[i-1] - 0.0001
-
-                         filled_partition_array = np.round(interpolated_array, 4)
-
-                     if tag == 'e033511':
-                         print('After completing the values (after interpolation/extrapolation):', filled_partition_array)
-
-                     # Format the updated line
-                     #updated_line = (
-                         #f'{fpartitionline[:38]} '
-                         #+ '  '.join([f'{v:.4f}' if v is not None else '---' for v in filled_partition_array])
-                         #+ '\n'
-                     #)
-                     updated_line = (
-                         f'{fpartitionline[:38]} '
-                         + ''.join([f'{(f"{v:.4f}" if v is not None else "---"):>13}' for v in filled_partition_array])
-                         + '\n'
-                     )
-                     outfile.write(updated_line)
-
-                     # Genera plots only if they don't exist
-                     log_plot_path = f'./catalog_partitioncorrection/{tag}_part_log.png'
-                     lin_plot_path = f'./catalog_partitioncorrection/{tag}_part_lin.png'
-                     if not os.path.exists(log_plot_path) or not os.path.exists(lin_plot_path):
-                         print('plotting')
-
-                         # Filtrar valores no válidos
-                         partition_array_clean = np.array(
-                             [val if val not in [None, '---', np.nan] else np.nan for val in partition_array], dtype=np.float64
-                         )
-                         filled_partition_array_clean = np.array(
-                             [val if val not in [None, '---', np.nan] else np.nan for val in filled_partition_array], dtype=np.float64
+                         # Make the filled_partition_array a numpy array to play with it
+                         filled_partition_array = np.array(
+                             #[float(val) if val != '---' else np.nan for val in filled_partition_array], dtype=np.float64
+                             #[float(val) if val is not None else np.nan for val in filled_partition_array], dtype=np.float64
+                             [float(val) if val not in [None, '---'] else np.nan for val in filled_partition_array], dtype=np.float64
                          )
 
-                         # Filtrar temperaturas y valores correspondientes
-                         valid_partition_indices = ~np.isnan(partition_array_clean)
-                         valid_filled_indices = ~np.isnan(filled_partition_array_clean)
+                         # Interpolate and extrapolate
+                         # Interpolate using PCHIP (monotonic interpolation)
+                         if np.any(np.isnan(filled_partition_array)):
+                             indices = np.arange(len(filled_partition_array))
+                             valid_indices = indices[~np.isnan(filled_partition_array)]
+                             valid_values = filled_partition_array[~np.isnan(filled_partition_array)]
 
-                         temp_labels_partition = np.array(temp_labels[:len(partition_array)])[valid_partition_indices]
-                         partition_values_clean = partition_array_clean[valid_partition_indices]
+                             # PCHIP interpolator (ensures monotonicity)
+                             pchip_interpolator = PchipInterpolator(valid_indices, valid_values, extrapolate=False)
+                             interpolated_array = pchip_interpolator(indices)
 
-                         temp_labels_filled = np.array(temp_labels[:len(filled_partition_array)])[valid_filled_indices]
-                         filled_values_clean = filled_partition_array_clean[valid_filled_indices]
+                             # Handle extrapolation manually
+                             first_valid_index = valid_indices[0]
+                             last_valid_index = valid_indices[-1]
 
-                         # Realizar ajuste polinómico de grado 5
-                         fit = np.polyfit(x, y, 5)
-                         poly_line = np.poly1d(fit)
-                         y_fit_log = poly_line(x)
-                         y_fit_lin = poly_line(np.log10(temp_labels[:len(filled_partition_array)]))
+                             # Extrapolate before the first valid index
+                             slope_start = (valid_values[1] - valid_values[0]) / (valid_indices[1] - valid_indices[0])
+                             for i in range(first_valid_index):
+                                 interpolated_array[i] = valid_values[0] + slope_start * (i - first_valid_index)
 
-                         # Plot log scale
-                         plt.figure(figsize=[20, 14])
-                         plt.plot(x, y, "sg-", label="Values from efile")
-                         plt.plot(np.log10(temp_labels_partition), np.log10(partition_values_clean), "ob-", label="Original partition values")
-                         plt.plot(np.log10(temp_labels_filled), np.log10(filled_values_clean), "xr-", label="Completed values")
-                         plt.plot(x, y_fit_log, "c--", label="Polynomial fit (degree 5)")
-                         plt.xlabel("log10(T)")
-                         plt.ylabel("log10(Q)")
-                         plt.title(f"Partition Function (Log Scale) - {tag}")
-                         plt.legend()
-                         plt.savefig(log_plot_path)
-                         plt.close()
+                             # Extrapolate after the last valid index
+                             slope_end = (valid_values[-1] - valid_values[-2]) / (valid_indices[-1] - valid_indices[-2])
+                             for i in range(last_valid_index + 1, len(filled_partition_array)):
+                                 interpolated_array[i] = valid_values[-1] + slope_end * (i - last_valid_index)
 
-                         # Plot linear scale
-                         plt.figure(figsize=[20, 14])
-                         plt.plot(10**x, 10**y, "sg-", label="Values from efile")
-                         plt.plot(temp_labels_partition, partition_values_clean, "ob-", label="Original partition values")
-                         plt.plot(temp_labels_filled, filled_values_clean, "xr-", label="Completed values")
-                         plt.plot(temp_labels[:len(filled_partition_array)], 10**y_fit_lin, "c--", label="Polynomial fit (degree 5)")
-                         plt.xlabel("T")
-                         plt.ylabel("Q")
-                         plt.title(f"Partition Function (Linear Scale) - {tag}")
-                         plt.legend()
-                         plt.savefig(lin_plot_path)
-                         plt.close()
+                             # Ensure monotonicity for extrapolated values
+                             for i in range(1, len(interpolated_array)):
+                                 if interpolated_array[i] >= interpolated_array[i-1]:  # Monotonía rota
+                                     interpolated_array[i] = interpolated_array[i-1] - 0.0001
+
+                             filled_partition_array = np.round(interpolated_array, 4)
+
+                         if tag == 'e033511':
+                             print('After completing the values (after interpolation/extrapolation):', filled_partition_array)
+
+                         # Format the updated line
+                         #updated_line = (
+                             #f'{fpartitionline[:38]} '
+                             #+ '  '.join([f'{v:.4f}' if v is not None else '---' for v in filled_partition_array])
+                             #+ '\n'
+                         #)
+                         updated_line = (
+                             f'{fpartitionline[:38]} '
+                             + ''.join([f'{(f"{v:.4f}" if v is not None else "---"):>13}' for v in filled_partition_array])
+                             + '\n'
+                         )
+                         outfile.write(updated_line)
+
+                         # Genera plots only if they don't exist
+                         log_plot_path = f'./catalog_partitioncorrection/{tag}_part_log.png'
+                         lin_plot_path = f'./catalog_partitioncorrection/{tag}_part_lin.png'
+                         if not os.path.exists(log_plot_path) or not os.path.exists(lin_plot_path):
+                             print('plotting')
+
+                             # Filtrar valores no válidos
+                             partition_array_clean = np.array(
+                                 [val if val not in [None, '---', np.nan] else np.nan for val in partition_array], dtype=np.float64
+                             )
+                             filled_partition_array_clean = np.array(
+                                 [val if val not in [None, '---', np.nan] else np.nan for val in filled_partition_array], dtype=np.float64
+                             )
+
+                             # Filtrar temperaturas y valores correspondientes
+                             valid_partition_indices = ~np.isnan(partition_array_clean)
+                             valid_filled_indices = ~np.isnan(filled_partition_array_clean)
+
+                             temp_labels_partition = np.array(temp_labels[:len(partition_array)])[valid_partition_indices]
+                             partition_values_clean = partition_array_clean[valid_partition_indices]
+
+                             temp_labels_filled = np.array(temp_labels[:len(filled_partition_array)])[valid_filled_indices]
+                             filled_values_clean = filled_partition_array_clean[valid_filled_indices]
+
+                             # Realizar ajuste polinómico de grado 5
+                             fit = np.polyfit(x, y, 5)
+                             poly_line = np.poly1d(fit)
+                             y_fit_log = poly_line(x)
+                             y_fit_lin = poly_line(np.log10(temp_labels[:len(filled_partition_array)]))
+
+                             # Plot log scale
+                             plt.figure(figsize=[20, 14])
+                             plt.plot(x, y, "sg-", label="Values from efile")
+                             plt.plot(np.log10(temp_labels_partition), np.log10(partition_values_clean), "ob-", label="Original partition values")
+                             plt.plot(np.log10(temp_labels_filled), np.log10(filled_values_clean), "xr-", label="Completed values")
+                             plt.plot(x, y_fit_log, "c--", label="Polynomial fit (degree 5)")
+                             plt.xlabel("log10(T)")
+                             plt.ylabel("log10(Q)")
+                             plt.title(f"Partition Function (Log Scale) - {tag}")
+                             plt.legend()
+                             plt.savefig(log_plot_path)
+                             plt.close()
+
+                             # Plot linear scale
+                             plt.figure(figsize=[20, 14])
+                             plt.plot(10**x, 10**y, "sg-", label="Values from efile")
+                             plt.plot(temp_labels_partition, partition_values_clean, "ob-", label="Original partition values")
+                             plt.plot(temp_labels_filled, filled_values_clean, "xr-", label="Completed values")
+                             plt.plot(temp_labels[:len(filled_partition_array)], 10**y_fit_lin, "c--", label="Polynomial fit (degree 5)")
+                             plt.xlabel("T")
+                             plt.ylabel("Q")
+                             plt.title(f"Partition Function (Linear Scale) - {tag}")
+                             plt.legend()
+                             plt.savefig(lin_plot_path)
+                             plt.close()
 
 
-                         # Plotting the values in logaritmic and linear scale to check them.
-                         #fit = np.polyfit(x, y ,5)
-                         #line = np.poly1d(fit)
-                         #y_new = line(x_new)
-                         #plt.figure(figsize=[20,14])
-                         #plt.plot(x, y, "sg-", x_new, y_new, "or")
-                         #plt.plot(x, line(x))
-                         #plt.xlabel("log10(T)")
-                         #plt.ylabel("log10(Q)")
-                         #plt.title("%s" %tag)
-                         #plt.savefig('./catalog_partitioncorrection/%s_part_log.png' %tag)
-                         #print(10**y_new)
-                         #print((10**y_new-10**y)/10**y*100)
-                         #plt.gcf().clear()
-                         #plt.close()
-                         #plt.plot(10**x, 10**y, "sg-", 10**x_new, 10**y_new, "or");
-                         #plt.plot(10**x, 10**line(x))
-                         #plt.xlabel("T")
-                         #plt.ylabel("Q")
-                         #plt.title("%s" %tag)
-                         #plt.savefig('./catalog_partitioncorrection/%s_part_lin.png' %tag)
-                         #plt.close()
+                             # Plotting the values in logaritmic and linear scale to check them.
+                             #fit = np.polyfit(x, y ,5)
+                             #line = np.poly1d(fit)
+                             #y_new = line(x_new)
+                             #plt.figure(figsize=[20,14])
+                             #plt.plot(x, y, "sg-", x_new, y_new, "or")
+                             #plt.plot(x, line(x))
+                             #plt.xlabel("log10(T)")
+                             #plt.ylabel("log10(Q)")
+                             #plt.title("%s" %tag)
+                             #plt.savefig('./catalog_partitioncorrection/%s_part_log.png' %tag)
+                             #print(10**y_new)
+                             #print((10**y_new-10**y)/10**y*100)
+                             #plt.gcf().clear()
+                             #plt.close()
+                             #plt.plot(10**x, 10**y, "sg-", 10**x_new, 10**y_new, "or");
+                             #plt.plot(10**x, 10**line(x))
+                             #plt.xlabel("T")
+                             #plt.ylabel("Q")
+                             #plt.title("%s" %tag)
+                             #plt.savefig('./catalog_partitioncorrection/%s_part_lin.png' %tag)
+                             #plt.close()
 
     # Write the footer
     outfile.writelines(footer)
 
-    print("Sanity Check Report:")
-    print("=====================")
-    print(f"Total lines with monotonicity issues: {len(sanity_check_violations)}")
+print("Sanity Check Report:")
+print("=====================")
+print(f"Total lines with monotonicity issues: {len(sanity_check_violations)}")
+with open("monotonyissues.txt", "w") as file:
     for line, indices in sanity_check_violations:
-        print(f"Line: {line}")
-        print(f"Indices fixed: {indices}")
+        file.write(line[:32] + "\n")
+print("A file named monotonyissues.txt has been generated with these issues.")
 
+print("Hay ",complete, "ids que tienen la partition function completa para los 7 valores que maneja MADCUBA")
+print("Por tanto no se han procesado y son :")
+with open("unalteredids.txt", "w") as file:
+    file.write(", ".join(complete_array))
+print("A file named unalteredids.txt has been generated with these ids.")
