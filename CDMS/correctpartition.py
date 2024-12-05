@@ -19,8 +19,6 @@ def check_monotonicity(values, line_number):
         (i, v) for i, v in enumerate(corrected_values) if v not in [None, '---', np.nan]
     ]
 
-    if 4.1069 in corrected_values:
-        print('Array limpio: ', cleaned_values)
     # Extraer solo los valores válidos y sus índices
     valid_indices, valid_values = zip(*cleaned_values) if cleaned_values else ([], [])
 
@@ -57,8 +55,8 @@ for fpartitionline in fpartitionlines[15:]:
                     f'https://cdms.astro.uni-koeln.de/cgi-bin/cdmsinfo?file=e{fpartitioncode}.cat', 
                       out=filepath
                 )
-            else:
-                print(f"File {filepath} already exists. Skipping download.")
+            #else:
+                #print(f"File {filepath} already exists. Skipping download.")
 
 
 # Separate the HTML structure
@@ -83,7 +81,8 @@ with open('output_partition_function.html', 'w') as outfile:
     # Eduardo Toledo 2 Dec 2024
     # Process each line in the original partition file
     for fpartitionline in fpartitionlines[15:]:
-        if "<" not in fpartitionline:
+        #if "<" not in fpartitionline:
+         if not fpartitionline.startswith("<"):
              tag = fpartitionline[0:6].replace("  ","00").replace(" ","0")
              if tag.strip() != "":
                  tag = 'e' + tag
@@ -92,16 +91,17 @@ with open('output_partition_function.html', 'w') as outfile:
 
                      x = []
                      y = []
+                     counter = 0
 
                      for lines in efile.readlines():
                          if "Q(" in lines:
-                             #print(lines)
                              x =np.append(x,lines.split("Q(")[1].split(")")[0])
                              if ('(' in lines.split("right>")[1].split("<")[0]):
                                  y =np.append(y,lines.split("right>")[1].split(" (")[0])
                              else:
                                  y =np.append(y,lines.split("right>")[1].split("<")[0])
-                     if tag == 'e033511':
+                     if tag in ['e033515', 'e043508', 'e060526']:
+                         print('Tag: ', tag)
                          print('Temps from efile: ',x)
                      #print('Values of Q from efile: ',y)
 
@@ -111,21 +111,20 @@ with open('output_partition_function.html', 'w') as outfile:
                      x = np.log10(x)
                      y = np.log10(y)
                      #print('Tag :', tag)
-                     if tag == 'e033511':
+                     if tag in ['e033515', 'e043508', 'e060526']:
                          print('Values of log(Q) from the efile: ',y)
                      # Extract lg(Q) values from the partition line
-                     #print(fpartitionline)
                      temp_labels = [1000.0, 500.0, 300.0, 225.0, 150.0, 75.0, 37.5, 18.75, 9.375, 5.000, 2.725]
                      partition_values = fpartitionline[37:].split()[1:]
                      partition_array = np.array([float(val) if val != '---' else None for val in partition_values])
-                     if tag == 'e033511':
+                     if tag in ['e033515', 'e043508', 'e060526']: 
                          print('Values log(Q) from partition file: ',partition_array)
                      #print(y)
                      #print(x)
 
 
                      # Correct the partition array from all the violations of monotonicity
-                     if tag == 'e033511':
+                     if tag in ['e033515', 'e043508', 'e060526']:
                          print('Checking monotonicity: ', partition_array)
 
                      if all(partition_array[i] not in [None, '---', np.nan] for i in range(2, 9)):
@@ -152,7 +151,7 @@ with open('output_partition_function.html', 'w') as outfile:
                                      filled_partition_array[i] = y[idx]
                                  else:
                                      filled_partition_array[i] = '---'
-                         if tag == 'e033511':
+                         if tag in ['e033515', 'e043508', 'e060526']:
                              print('After completing the values: ', filled_partition_array)
 
                          # Make the filled_partition_array a numpy array to play with it
@@ -192,14 +191,19 @@ with open('output_partition_function.html', 'w') as outfile:
 
                              filled_partition_array = np.round(interpolated_array, 4)
 
-                         if tag == 'e033511':
+                         if tag in ['e033515', 'e043508', 'e060526']:
                              print('After completing the values (after interpolation/extrapolation):', filled_partition_array)
 
                          updated_line = (
-                             f'{fpartitionline[:38]} '
+                             f'{fpartitionline[:38]}'
                              + ''.join([f'{(f"{v:.4f}" if v is not None else "---"):>13}' for v in filled_partition_array])
                              + '\n'
                          )
+                         #updated_line = (
+                             #f'{fpartitionline[:38]}'
+                             #+ ''.join([f'{(f"{v:.4f}" if v is not None else "---"):>13}' for v in filled_partition_array])
+                             #+ '\n'
+                         #)
                          outfile.write(updated_line)
 
                          # Genera plots only if they don't exist
@@ -226,6 +230,8 @@ with open('output_partition_function.html', 'w') as outfile:
                              temp_labels_filled = np.array(temp_labels[:len(filled_partition_array)])[valid_filled_indices]
                              filled_values_clean = filled_partition_array_clean[valid_filled_indices]
 
+                             print(x)
+                             print(y)
                              # Realizar ajuste polinómico de grado 5
                              fit = np.polyfit(x, y, 5)
                              poly_line = np.poly1d(fit)
