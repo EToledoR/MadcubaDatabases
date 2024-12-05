@@ -30,13 +30,6 @@ def check_monotonicity(values, line_number):
             violations.append(valid_indices[i])
             corrected_values[valid_indices[i]] = None  # Marcamos como hueco
 
-
-    #for i in range(1, len(values)):
-        #if corrected_values[i] is not None and corrected_values[i-1] is not None:
-            #if corrected_values[i] > corrected_values[i-1]:  # Monotonía rota
-                #violations.append(i)
-                #corrected_values[i] = None  # Marcamos como hueco
-
     return corrected_values, violations
 
 fpartition = open('partition_function.html',"r")
@@ -52,7 +45,6 @@ if not os.path.isdir('catalog_partitioncorrection'):
 with open('partition_function.html', 'r') as infile:
     lines = infile.readlines()
 
-# Process each line in the original partition file
 for fpartitionline in fpartitionlines[15:]:
     #print(fpartitionline[:4])
     if "<" not in fpartitionline:
@@ -67,10 +59,7 @@ for fpartitionline in fpartitionlines[15:]:
                 )
             else:
                 print(f"File {filepath} already exists. Skipping download.")
-        #downloadedfilename=wget.download(
-            #'https://cdms.astro.uni-koeln.de/cgi-bin/cdmsinfo?file=e%s.cat' %fpartitioncode, 
-            #out='./catalog_partitioncorrection/e%s.cat'%fpartitioncode
-        #)
+
 
 # Separate the HTML structure
 header = lines[:15]  # First 15 lines (HTML header and column headers)
@@ -143,6 +132,7 @@ with open('output_partition_function.html', 'w') as outfile:
                          # Si cumplen la condición, añadir a la lista y no procesar
                          complete_array.append(tag)
                          complete += 1
+                         outfile.write(fpartitionline)
                      else:
                          corrected_partition_array, violations = check_monotonicity(partition_array, fpartitionline)
                          if violations:
@@ -167,8 +157,6 @@ with open('output_partition_function.html', 'w') as outfile:
 
                          # Make the filled_partition_array a numpy array to play with it
                          filled_partition_array = np.array(
-                             #[float(val) if val != '---' else np.nan for val in filled_partition_array], dtype=np.float64
-                             #[float(val) if val is not None else np.nan for val in filled_partition_array], dtype=np.float64
                              [float(val) if val not in [None, '---'] else np.nan for val in filled_partition_array], dtype=np.float64
                          )
 
@@ -207,12 +195,6 @@ with open('output_partition_function.html', 'w') as outfile:
                          if tag == 'e033511':
                              print('After completing the values (after interpolation/extrapolation):', filled_partition_array)
 
-                         # Format the updated line
-                         #updated_line = (
-                             #f'{fpartitionline[:38]} '
-                             #+ '  '.join([f'{v:.4f}' if v is not None else '---' for v in filled_partition_array])
-                             #+ '\n'
-                         #)
                          updated_line = (
                              f'{fpartitionline[:38]} '
                              + ''.join([f'{(f"{v:.4f}" if v is not None else "---"):>13}' for v in filled_partition_array])
