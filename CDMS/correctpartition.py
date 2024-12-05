@@ -216,28 +216,80 @@ with open('output_partition_function.html', 'w') as outfile:
                      lin_plot_path = f'./catalog_partitioncorrection/{tag}_part_lin.png'
                      if not os.path.exists(log_plot_path) or not os.path.exists(lin_plot_path):
                          print('plotting')
-                         # Plotting the values in logaritmic and linear scale to check them.
-                         fit = np.polyfit(x, y ,5)
-                         line = np.poly1d(fit)
-                         y_new = line(x_new)
-                         plt.figure(figsize=[20,14])
-                         plt.plot(x, y, "sg-", x_new, y_new, "or")
-                         plt.plot(x, line(x))
+
+                         # Filtrar valores no válidos
+                         partition_array_clean = np.array(
+                             [val if val not in [None, '---', np.nan] else np.nan for val in partition_array], dtype=np.float64
+                         )
+                         filled_partition_array_clean = np.array(
+                             [val if val not in [None, '---', np.nan] else np.nan for val in filled_partition_array], dtype=np.float64
+                         )
+
+                         # Filtrar temperaturas y valores correspondientes
+                         valid_partition_indices = ~np.isnan(partition_array_clean)
+                         valid_filled_indices = ~np.isnan(filled_partition_array_clean)
+
+                         temp_labels_partition = np.array(temp_labels[:len(partition_array)])[valid_partition_indices]
+                         partition_values_clean = partition_array_clean[valid_partition_indices]
+
+                         temp_labels_filled = np.array(temp_labels[:len(filled_partition_array)])[valid_filled_indices]
+                         filled_values_clean = filled_partition_array_clean[valid_filled_indices]
+
+                         # Realizar ajuste polinómico de grado 5
+                         fit = np.polyfit(x, y, 5)
+                         poly_line = np.poly1d(fit)
+                         y_fit_log = poly_line(x)
+                         y_fit_lin = poly_line(np.log10(temp_labels[:len(filled_partition_array)]))
+
+                         # Plot log scale
+                         plt.figure(figsize=[20, 14])
+                         plt.plot(x, y, "sg-", label="Values from efile")
+                         plt.plot(np.log10(temp_labels_partition), np.log10(partition_values_clean), "ob-", label="Original partition values")
+                         plt.plot(np.log10(temp_labels_filled), np.log10(filled_values_clean), "xr-", label="Completed values")
+                         plt.plot(x, y_fit_log, "c--", label="Polynomial fit (degree 5)")
                          plt.xlabel("log10(T)")
                          plt.ylabel("log10(Q)")
-                         plt.title("%s" %tag)
-                         plt.savefig('./catalog_partitioncorrection/%s_part_log.png' %tag)
+                         plt.title(f"Partition Function (Log Scale) - {tag}")
+                         plt.legend()
+                         plt.savefig(log_plot_path)
+                         plt.close()
+
+                         # Plot linear scale
+                         plt.figure(figsize=[20, 14])
+                         plt.plot(10**x, 10**y, "sg-", label="Values from efile")
+                         plt.plot(temp_labels_partition, partition_values_clean, "ob-", label="Original partition values")
+                         plt.plot(temp_labels_filled, filled_values_clean, "xr-", label="Completed values")
+                         plt.plot(temp_labels[:len(filled_partition_array)], 10**y_fit_lin, "c--", label="Polynomial fit (degree 5)")
+                         plt.xlabel("T")
+                         plt.ylabel("Q")
+                         plt.title(f"Partition Function (Linear Scale) - {tag}")
+                         plt.legend()
+                         plt.savefig(lin_plot_path)
+                         plt.close()
+
+
+                         # Plotting the values in logaritmic and linear scale to check them.
+                         #fit = np.polyfit(x, y ,5)
+                         #line = np.poly1d(fit)
+                         #y_new = line(x_new)
+                         #plt.figure(figsize=[20,14])
+                         #plt.plot(x, y, "sg-", x_new, y_new, "or")
+                         #plt.plot(x, line(x))
+                         #plt.xlabel("log10(T)")
+                         #plt.ylabel("log10(Q)")
+                         #plt.title("%s" %tag)
+                         #plt.savefig('./catalog_partitioncorrection/%s_part_log.png' %tag)
                          #print(10**y_new)
                          #print((10**y_new-10**y)/10**y*100)
                          #plt.gcf().clear()
-                         plt.close()
-                         plt.plot(10**x, 10**y, "sg-", 10**x_new, 10**y_new, "or");
-                         plt.plot(10**x, 10**line(x))
-                         plt.xlabel("T")
-                         plt.ylabel("Q")
-                         plt.title("%s" %tag)
-                         plt.savefig('./catalog_partitioncorrection/%s_part_lin.png' %tag)
-                         plt.close()
+                         #plt.close()
+                         #plt.plot(10**x, 10**y, "sg-", 10**x_new, 10**y_new, "or");
+                         #plt.plot(10**x, 10**line(x))
+                         #plt.xlabel("T")
+                         #plt.ylabel("Q")
+                         #plt.title("%s" %tag)
+                         #plt.savefig('./catalog_partitioncorrection/%s_part_lin.png' %tag)
+                         #plt.close()
 
     # Write the footer
     outfile.writelines(footer)
