@@ -8,25 +8,36 @@ from scipy.interpolate import PchipInterpolator
 # Sanity check: Verificar monotonía decreciente
 def check_monotonicity(values, line_number):
     """
-    Verifica si los valores son monotonamente decrecientes.
-    Si no lo son, corrige los valores reemplazando los incorrectos por None.
+    Check that an array in monotonically decreasing and replace the
+    values breaking the monotony by a None to be replaced once more
+    by interpolation at a later stage.
+
+    parameters:
+    values: array with the partition function values to evaluate
+    line number: string with the id of the line for further reference
+
+    return:
+    corrected_values: an array with the partition function values that
+        follow monotony and None in the ones breaking it. 
+    violations: an array with the lines that has monotony violations on
+        it.
     """
     corrected_values = values.copy()
-    violations = []  # Para registrar los índices que rompen la monotonía
+    violations = []
 
-    # Limpiar valores no numéricos
+    # Clean non numerical values
     cleaned_values = [
         (i, v) for i, v in enumerate(corrected_values) if v not in [None, '---', np.nan]
     ]
 
-    # Extraer solo los valores válidos y sus índices
+    # Extract vlid values and their indeces
     valid_indices, valid_values = zip(*cleaned_values) if cleaned_values else ([], [])
 
-    # Comprobar monotonía decreciente
+    # Check monotony
     for i in range(1, len(valid_values)):
-        if valid_values[i] > valid_values[i-1]:  # Monotonía rota
+        if valid_values[i] > valid_values[i-1]:  # Broken monotony
             violations.append(valid_indices[i])
-            corrected_values[valid_indices[i]] = None  # Marcamos como hueco
+            corrected_values[valid_indices[i]] = None  # Creating a gap
 
     return corrected_values, violations
 
@@ -34,6 +45,8 @@ fpartition = open('partition_function.html',"r")
 fpartitionlines = fpartition.readlines()
 fpartition.close()
 
+# Create a directory to storage the efiles in case 
+# it already doesn't exsists
 if not os.path.isdir('catalog_partitioncorrection'):
     os.mkdir('catalog_partitioncorrection')
 
@@ -43,25 +56,25 @@ if not os.path.isdir('catalog_partitioncorrection'):
 with open('partition_function.html', 'r') as infile:
     lines = infile.readlines()
 
+# Loop to get all the efiles for the species in the partition
+# function file
 for fpartitionline in fpartitionlines[15:]:
-    #print(fpartitionline[:4])
     if "<" not in fpartitionline:
         fpartitioncode = fpartitionline[0:6].replace("  ","00").replace(" ","0")
         if fpartitioncode.strip() != "":
-            #print(fpartitioncode)
             filepath = f'./catalog_partitioncorrection/e{fpartitioncode}.cat'
             if not os.path.exists(filepath):
                 downloadedfilename = wget.download(
                     f'https://cdms.astro.uni-koeln.de/cgi-bin/cdmsinfo?file=e{fpartitioncode}.cat', 
                       out=filepath
                 )
-            #else:
-                #print(f"File {filepath} already exists. Skipping download.")
+            else:
+                print(f"File {filepath} already exists. Skipping download.")
 
 
 # Separate the HTML structure
 header = lines[:15]  # First 15 lines (HTML header and column headers)
-footer = lines[-5:]  # Last line (HTML footer)
+footer = lines[-5:]  # Last lines (HTML footer)
 data_lines = lines[15:-5]  # Everything in between (data rows)
 
 # Prepare the output file
@@ -87,7 +100,6 @@ with open('output_partition_function.html', 'w') as outfile:
              if tag.strip() != "":
                  tag = 'e' + tag
                  with open('./catalog_partitioncorrection/%s.cat' %tag, 'r', encoding='latin-1') as efile:
-                     #print(efile)
 
                      x = []
                      y = []
@@ -100,46 +112,38 @@ with open('output_partition_function.html', 'w') as outfile:
                                  y =np.append(y,lines.split("right>")[1].split(" (")[0])
                              else:
                                  y =np.append(y,lines.split("right>")[1].split("<")[0])
-                     if tag in ['e033515', 'e043508', 'e060526']:
-                         print('Tag: ', tag)
-                         print('Temps from efile: ',x)
-                     #print('Values of Q from efile: ',y)
 
-                     # Convertir listas a numpy arrays
+                     # Convert lists to numpy arrays
                      x = np.array(x, dtype=float)
                      y = np.array(y, dtype=float)
                      x = np.log10(x)
                      y = np.log10(y)
-                     #print('Tag :', tag)
-                     if tag in ['e033515', 'e043508', 'e060526']:
-                         print('Values of log(Q) from the efile: ',y)
+
                      # Extract lg(Q) values from the partition line
                      temp_labels = [1000.0, 500.0, 300.0, 225.0, 150.0, 75.0, 37.5, 18.75, 9.375, 5.000, 2.725]
                      partition_values = fpartitionline[37:].split()[1:]
                      partition_array = np.array([float(val) if val != '---' else None for val in partition_values])
-                     if tag in ['e033515', 'e043508', 'e060526']: 
-                         print('Values log(Q) from partition file: ',partition_array)
+
                      #print(y)
                      #print(x)
 
 
-                     # Correct the partition array from all the violations of monotonicity
-                     if tag in ['e033515', 'e043508', 'e060526']:
-                         print('Checking monotonicity: ', partition_array)
-
+                     # Check if a line has all the values needed to be ingested in MADCUBA, between 300
+                     # and 9.375 If the do, don't process them any further.
                      if all(partition_array[i] not in [None, '---', np.nan] for i in range(2, 9)):
-                         # Si cumplen la condición, añadir a la lista y no procesar
                          complete_array.append(tag)
                          complete += 1
                          outfile.write(fpartitionline)
+                     # Otherwise complete the values from the efiles and then interpolate and extrapolate the rest of
+                     # values.
                      else:
+                         # First, check for monotony issues and remove them from the array
                          corrected_partition_array, violations = check_monotonicity(partition_array, fpartitionline)
                          if violations:
                              sanity_check_violations.append((fpartitionline.strip(), violations))
 
-                         # Fill gaps
+                         # Fill gaps with data from the efiles
                          filled_partition_array = corrected_partition_array.copy()
-                         #filled_partition_array = partition_array.copy()
                          for i, val in enumerate(partition_array):
                              if val is None:
                                  # Get the temperature value correspondent
@@ -151,8 +155,6 @@ with open('output_partition_function.html', 'w') as outfile:
                                      filled_partition_array[i] = y[idx]
                                  else:
                                      filled_partition_array[i] = '---'
-                         if tag in ['e033515', 'e043508', 'e060526']:
-                             print('After completing the values: ', filled_partition_array)
 
                          # Make the filled_partition_array a numpy array to play with it
                          filled_partition_array = np.array(
@@ -166,7 +168,7 @@ with open('output_partition_function.html', 'w') as outfile:
                              valid_indices = indices[~np.isnan(filled_partition_array)]
                              valid_values = filled_partition_array[~np.isnan(filled_partition_array)]
 
-                             # PCHIP interpolator (ensures monotonicity)
+                             # PCHIP interpolator (ensures monotony)
                              pchip_interpolator = PchipInterpolator(valid_indices, valid_values, extrapolate=False)
                              interpolated_array = pchip_interpolator(indices)
 
@@ -186,33 +188,27 @@ with open('output_partition_function.html', 'w') as outfile:
 
                              # Ensure monotonicity for extrapolated values
                              for i in range(1, len(interpolated_array)):
-                                 if interpolated_array[i] >= interpolated_array[i-1]:  # Monotonía rota
-                                     interpolated_array[i] = interpolated_array[i-1] - 0.0001
+                                 if interpolated_array[i] >= interpolated_array[i-1]:  # Broken monotony
+                                     interpolated_array[i] = interpolated_array[i-1] - 0.0001 # To be improved (but how?) ET Dec2024
 
                              filled_partition_array = np.round(interpolated_array, 4)
 
-                         if tag in ['e033515', 'e043508', 'e060526']:
-                             print('After completing the values (after interpolation/extrapolation):', filled_partition_array)
-
+                         # Creating the line to populate the new partition function file with the corrected values
                          updated_line = (
                              f'{fpartitionline[:38]}'
                              + ''.join([f'{(f"{v:.4f}" if v is not None else "---"):>13}' for v in filled_partition_array])
                              + '\n'
                          )
-                         #updated_line = (
-                             #f'{fpartitionline[:38]}'
-                             #+ ''.join([f'{(f"{v:.4f}" if v is not None else "---"):>13}' for v in filled_partition_array])
-                             #+ '\n'
-                         #)
+
                          outfile.write(updated_line)
 
-                         # Genera plots only if they don't exist
+                         # Generate plots only if they don't exist
                          log_plot_path = f'./catalog_partitioncorrection/{tag}_part_log.png'
                          lin_plot_path = f'./catalog_partitioncorrection/{tag}_part_lin.png'
                          if not os.path.exists(log_plot_path) or not os.path.exists(lin_plot_path):
-                             print('plotting')
+                             #print('plotting')
 
-                             # Filtrar valores no válidos
+                             # Filter non valid values to plot
                              partition_array_clean = np.array(
                                  [val if val not in [None, '---', np.nan] else np.nan for val in partition_array], dtype=np.float64
                              )
@@ -220,7 +216,7 @@ with open('output_partition_function.html', 'w') as outfile:
                                  [val if val not in [None, '---', np.nan] else np.nan for val in filled_partition_array], dtype=np.float64
                              )
 
-                             # Filtrar temperaturas y valores correspondientes
+                             # Filter temperatures and correspondent values
                              valid_partition_indices = ~np.isnan(partition_array_clean)
                              valid_filled_indices = ~np.isnan(filled_partition_array_clean)
 
@@ -232,7 +228,8 @@ with open('output_partition_function.html', 'w') as outfile:
 
                              print(x)
                              print(y)
-                             # Realizar ajuste polinómico de grado 5
+
+                             # Polynomic it grade 5
                              fit = np.polyfit(x, y, 5)
                              poly_line = np.poly1d(fit)
                              y_fit_log = poly_line(x)
@@ -265,32 +262,11 @@ with open('output_partition_function.html', 'w') as outfile:
                              plt.close()
 
 
-                             # Plotting the values in logaritmic and linear scale to check them.
-                             #fit = np.polyfit(x, y ,5)
-                             #line = np.poly1d(fit)
-                             #y_new = line(x_new)
-                             #plt.figure(figsize=[20,14])
-                             #plt.plot(x, y, "sg-", x_new, y_new, "or")
-                             #plt.plot(x, line(x))
-                             #plt.xlabel("log10(T)")
-                             #plt.ylabel("log10(Q)")
-                             #plt.title("%s" %tag)
-                             #plt.savefig('./catalog_partitioncorrection/%s_part_log.png' %tag)
-                             #print(10**y_new)
-                             #print((10**y_new-10**y)/10**y*100)
-                             #plt.gcf().clear()
-                             #plt.close()
-                             #plt.plot(10**x, 10**y, "sg-", 10**x_new, 10**y_new, "or");
-                             #plt.plot(10**x, 10**line(x))
-                             #plt.xlabel("T")
-                             #plt.ylabel("Q")
-                             #plt.title("%s" %tag)
-                             #plt.savefig('./catalog_partitioncorrection/%s_part_lin.png' %tag)
-                             #plt.close()
-
     # Write the footer
     outfile.writelines(footer)
 
+# Generating report of what happened with the data and generating the files 
+# with the different issues found.
 print("Sanity Check Report:")
 print("=====================")
 print(f"Total lines with monotonicity issues: {len(sanity_check_violations)}")
