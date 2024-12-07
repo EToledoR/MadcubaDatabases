@@ -239,7 +239,7 @@ with open('output_partition_function.html', 'w') as outfile:
                              plt.figure(figsize=[20, 14])
                              plt.plot(x, y, "sg-", label="Values from efile")
                              plt.plot(np.log10(temp_labels_partition), np.log10(partition_values_clean), "ob-", label="Original partition values")
-                             plt.plot(np.log10(temp_labels_filled), np.log10(filled_values_clean), "xr-", label="Completed values")
+                             #plt.plot(np.log10(temp_labels_filled), np.log10(filled_values_clean), "xr-", label="Completed values")
                              plt.plot(x, y_fit_log, "c--", label="Polynomial fit (degree 5)")
                              plt.xlabel("log10(T)")
                              plt.ylabel("log10(Q)")
@@ -252,7 +252,7 @@ with open('output_partition_function.html', 'w') as outfile:
                              plt.figure(figsize=[20, 14])
                              plt.plot(10**x, 10**y, "sg-", label="Values from efile")
                              plt.plot(temp_labels_partition, partition_values_clean, "ob-", label="Original partition values")
-                             plt.plot(temp_labels_filled, filled_values_clean, "xr-", label="Completed values")
+                             #plt.plot(temp_labels_filled, filled_values_clean, "xr-", label="Completed values")
                              plt.plot(temp_labels[:len(filled_partition_array)], 10**y_fit_lin, "c--", label="Polynomial fit (degree 5)")
                              plt.xlabel("T")
                              plt.ylabel("Q")
@@ -275,8 +275,7 @@ with open("monotonyissues.txt", "w") as file:
         file.write(line[:32] + "\n")
 print("A file named monotonyissues.txt has been generated with these issues.")
 
-print("Hay ",complete, "ids que tienen la partition function completa para los 7 valores que maneja MADCUBA")
-print("Por tanto no se han procesado y son :")
+print("Hay ",complete, "Ids with a complete partition function array of values valid for MADCUBA.")
 with open("unalteredids.txt", "w") as file:
     file.write(", ".join(complete_array))
 print("A file named unalteredids.txt has been generated with these ids.")
