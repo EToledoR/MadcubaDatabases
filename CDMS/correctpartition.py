@@ -127,7 +127,6 @@ with open('output_partition_function.html', 'w') as outfile:
                      #print(y)
                      #print(x)
 
-
                      # Check if a line has all the values needed to be ingested in MADCUBA, between 300
                      # and 9.375 If the do, don't process them any further.
                      if all(partition_array[i] not in [None, '---', np.nan] for i in range(2, 9)):
@@ -229,37 +228,111 @@ with open('output_partition_function.html', 'w') as outfile:
                              print(x)
                              print(y)
 
-                             # Polynomic it grade 5
-                             fit = np.polyfit(x, y, 5)
-                             poly_line = np.poly1d(fit)
-                             y_fit_log = poly_line(x)
-                             y_fit_lin = poly_line(np.log10(temp_labels[:len(filled_partition_array)]))
-
-                             # Plot log scale
+                             # Gráfico 1: Valores originales del partition file
                              plt.figure(figsize=[20, 14])
-                             plt.plot(x, y, "sg-", label="Values from efile")
-                             plt.plot(np.log10(temp_labels_partition), np.log10(partition_values_clean), "ob-", label="Original partition values")
-                             #plt.plot(np.log10(temp_labels_filled), np.log10(filled_values_clean), "xr-", label="Completed values")
-                             plt.plot(x, y_fit_log, "c--", label="Polynomial fit (degree 5)")
+                             #fit_partition = np.polyfit(np.log10(temp_labels_partition), np.log10(partition_array_clean), 5)
+                             # Truncar temp_labels para que coincida con la longitud de partition_array_clean
+                             temp_labels_partition = temp_labels[:len(partition_array_clean)]
+                             # Filtrar temp_labels_partition y partition_array_clean para tener la misma longitud
+                             valid_indices_partition = ~np.isnan(partition_array_clean)  # Máscara de valores válidos
+                             filtered_temp_labels_partition = np.array(temp_labels_partition)[valid_indices_partition]
+                             filtered_partition_array = partition_array_clean[valid_indices_partition]
+
+                             # Ajuste polinómico de grado 5
+                             fit_partition = np.polyfit(np.log10(filtered_temp_labels_partition), np.log10(filtered_partition_array), 5)
+                             poly_partition = np.poly1d(fit_partition)
+                             poly_partition = np.poly1d(fit_partition)
+                             plt.plot(np.log10(temp_labels_partition), np.log10(partition_array_clean), "ob-", label="Original partition values")
+                             plt.plot(np.log10(temp_labels_partition), poly_partition(np.log10(temp_labels_partition)), "r--", label="Polynomial fit (degree 5)")
                              plt.xlabel("log10(T)")
                              plt.ylabel("log10(Q)")
-                             plt.title(f"Partition Function (Log Scale) - {tag}")
+                             plt.title(f"Original Partition Values - {tag}")
                              plt.legend()
-                             plt.savefig(log_plot_path)
+                             plt.savefig(f'./catalog_partitioncorrection/{tag}_original_log.png')
                              plt.close()
 
-                             # Plot linear scale
+                             # Gráfico 2: Valores de las efiles
                              plt.figure(figsize=[20, 14])
-                             plt.plot(10**x, 10**y, "sg-", label="Values from efile")
-                             plt.plot(temp_labels_partition, partition_values_clean, "ob-", label="Original partition values")
-                             #plt.plot(temp_labels_filled, filled_values_clean, "xr-", label="Completed values")
-                             plt.plot(temp_labels[:len(filled_partition_array)], 10**y_fit_lin, "c--", label="Polynomial fit (degree 5)")
-                             plt.xlabel("T")
-                             plt.ylabel("Q")
-                             plt.title(f"Partition Function (Linear Scale) - {tag}")
+                             fit_efile = np.polyfit(x, y, 5)
+                             poly_efile = np.poly1d(fit_efile)
+                             plt.plot(x, y, "sg-", label="Values from efile")
+                             plt.plot(x, poly_efile(x), "r--", label="Polynomial fit (degree 5)")
+                             plt.xlabel("log10(T)")
+                             plt.ylabel("log10(Q)")
+                             plt.title(f"Efile Values - {tag}")
                              plt.legend()
-                             plt.savefig(lin_plot_path)
+                             plt.savefig(f'./catalog_partitioncorrection/{tag}_efile_log.png')
                              plt.close()
+
+                             # Gráfico 3: Valores después de la manipulación
+                             plt.figure(figsize=[20, 14])
+                             fit_final = np.polyfit(np.log10(temp_labels_filled), np.log10(filled_values_clean), 5)
+                             poly_final = np.poly1d(fit_final)
+                             plt.plot(np.log10(temp_labels_filled), np.log10(filled_values_clean), "xr-", label="Completed values")
+                             plt.plot(np.log10(temp_labels_filled), poly_final(np.log10(temp_labels_filled)), "r--", label="Polynomial fit (degree 5)")
+                             plt.xlabel("log10(T)")
+                             plt.ylabel("log10(Q)")
+                             plt.title(f"Final Values after Manipulation - {tag}")
+                             plt.legend()
+                             plt.savefig(f'./catalog_partitioncorrection/{tag}_final_log.png')
+                             plt.close()
+
+                             # Gráfico Comparativo: Original, Efile y Final
+                             plt.figure(figsize=[20, 14])
+
+                             # Gráfico 1: Valores originales del partition file
+                             plt.plot(np.log10(temp_labels_partition), np.log10(partition_array_clean), "ob-", label="Original partition values")
+                             plt.plot(np.log10(temp_labels_partition), poly_partition(np.log10(temp_labels_partition)), "b--", label="Polynomial fit (Original)")
+
+                             # Gráfico 2: Valores de las efiles
+                             plt.plot(x, y, "sg-", label="Values from efile")
+                             plt.plot(x, poly_efile(x), "g--", label="Polynomial fit (Efile)")
+
+                             # Gráfico 3: Valores después de la manipulación
+                             plt.plot(np.log10(temp_labels_filled), np.log10(filled_values_clean), "xr-", label="Completed values")
+                             plt.plot(np.log10(temp_labels_filled), poly_final(np.log10(temp_labels_filled)), "r--", label="Polynomial fit (Final)")
+
+                             # Configuración del gráfico
+                             plt.xlabel("log10(T)")
+                             plt.ylabel("log10(Q)")
+                             plt.title(f"Comparison of Original, Efile, and Final Adjusted Values - {tag}")
+                             plt.legend()
+                             plt.grid(True)
+                             plt.savefig(f'./catalog_partitioncorrection/{tag}_comparison_log.png')
+                             plt.close()
+
+
+                             # Polynomic it grade 5
+                             #fit = np.polyfit(x, y, 5)
+                             #poly_line = np.poly1d(fit)
+                             #y_fit_log = poly_line(x)
+                             #y_fit_lin = poly_line(np.log10(temp_labels[:len(filled_partition_array)]))
+
+                             # Plot log scale
+                             #plt.figure(figsize=[20, 14])
+                             #plt.plot(x, y, "sg-", label="Values from efile")
+                             #plt.plot(np.log10(temp_labels_partition), np.log10(partition_array_clean), "ob-", label="Original partition values")
+                             #plt.plot(np.log10(temp_labels_filled), np.log10(filled_partition_array_clean), "xr-", label="Completed values")
+                             #plt.plot(x, y_fit_log, "c--", label="Polynomial fit (degree 5)")
+                             #plt.xlabel("log10(T)")
+                             #plt.ylabel("log10(Q)")
+                             #plt.title(f"Partition Function (Log Scale) - {tag}")
+                             #plt.legend()
+                             #plt.savefig(log_plot_path)
+                             #plt.close()
+
+                             # Plot linear scale
+                             #plt.figure(figsize=[20, 14])
+                             #plt.plot(10**x, 10**y, "sg-", label="Values from efile")
+                             #plt.plot(temp_labels_partition, partition_array_clean, "ob-", label="Original partition values")
+                             #plt.plot(temp_labels_filled, filled_partition_array_clean, "xr-", label="Completed values")
+                             #plt.plot(temp_labels[:len(filled_partition_array)], 10**y_fit_lin, "c--", label="Polynomial fit (degree 5)")
+                             #plt.xlabel("T")
+                             #plt.ylabel("Q")
+                             #plt.title(f"Partition Function (Linear Scale) - {tag}")
+                             #plt.legend()
+                             #plt.savefig(lin_plot_path)
+                             #plt.close()
 
 
     # Write the footer
@@ -269,7 +342,7 @@ with open('output_partition_function.html', 'w') as outfile:
 # with the different issues found.
 print("Sanity Check Report:")
 print("=====================")
-print(f"Total lines with monotonicity issues: {len(sanity_check_violations)}")
+print(f"Total lines with monotony issues: {len(sanity_check_violations)}")
 with open("monotonyissues.txt", "w") as file:
     for line, indices in sanity_check_violations:
         file.write(line[:32] + "\n")
