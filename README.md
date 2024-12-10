@@ -150,6 +150,11 @@ For Hitran, we have four python scripts to be run in the follwing order:
 After that the files will be ready to be ingested. 
 
 ## The DBHSLQDBCreate.java class in MADCUBA codebase and how to regenerate the database
+The class DBHSLQDBCreate.java in MADCUBA is the class where the databases are managed and is the one where changes need to be done. 
+
+To run the generation of the database we need to execute that class as a java application. In order to do that we need to ensure that the class has a main method on it or than the main method is not commented out. 
+
+(Further comments to be added to deal with one new database added to the catalog). 
 
 ## Additional notes on the management of the db
 
@@ -157,4 +162,8 @@ After that the files will be ready to be ingested.
 
 
 ## TODO
-- Review which are the the files used for the hfs catalog.
+- Review which are the the files used for the hfs catalog. There is a number of errors in the website with the latest version of the hfs link being broken and therefore unable to use it. We have reported some of them and they are being fixed. We need to systematically go through all of them. 
+- Add documentation regading how to add new databases. Mainly the changes that we need to do in the MADCUBA codebase not only to include the database in the catalog but also so the new catalog is displayed in the combobox at the MADCUBA Gui. 
+- Allow multiple users databases.
+- Align queries for the Lovas databases with the other databases.
+- Add Lovas 2009 ctalog. 
