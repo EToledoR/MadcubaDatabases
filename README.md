@@ -143,13 +143,12 @@ After this the cat files will be in the catalog_hfs and the partition file ready
 
 
 
+## The DBHSLQDBCreate.java class in MADCUBA codebase and how to regenerate the database
 
 ## Additional notes on the management of the db
 
 ### Querying the db
 
-
-## The DBHSLQDBCreate.java class in MADCUBA codebase
 
 ## TODO
 - Review which are the the files used for the hfs catalog.
