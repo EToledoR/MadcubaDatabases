@@ -140,8 +140,14 @@ After this the cat files will be in the catalog_hfs and the partition file ready
 
 ### Step 4 - Hitran
 
+For Hitran, we have four python scripts to be run in the follwing order:
 
+- partitionfunctiontohtml.py A python script that read from the HITRAN database website the information and generate a file following the exact same format as the ones used by CDMS, JPL and Lille.
+- getHITRAN.py A python script that using the HITRAN API download all the the .par files (Hitran format) for each of the molecules and its isotopoogues.
+- parsinghitrandata.py A python script that reads each of the par files of the previous step and for each of them generate a cat file (the format used by the other databases) with a similar name standard using as id an internal id used for HITRAN. A series of calculations and changes in the units are performed, all of them detailed inline in the python code.
+- movefiles.py A python script that arrange the data in the way that MADCUBA would expect it with a catalog directory with all the .cat files and a partition function file outside that folder.
 
+After that the files will be ready to be ingested. 
 
 ## The DBHSLQDBCreate.java class in MADCUBA codebase and how to regenerate the database
 
