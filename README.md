@@ -159,6 +159,13 @@ To run the generation of the database we need to execute that class as a java ap
 ## Additional notes on the management of the db
 
 ### Querying the db
+java -cp ../MADCUBA/hsqldb.jar org.hsqldb.util.DatabaseManager
+setting config to jdbc:hsqldb:file:databaseName  (with no extension)
+
+org.hsqldb.jdbcDriver
+jdbc:hsqldb:file:lines
+
+java -cp /home/smartin/MADCUBA/MADCUBA_IJ/External\ Libraries/hsqldb.jar org.hsqldb.util.DatabaseManager
 
 
 ## TODO
