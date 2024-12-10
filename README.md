@@ -7,7 +7,7 @@ At the end of the README further insights would be provided to help with the inc
 
 These instructions are aimed to be run in a Linux or Linux-based(Mac OS) environment. 
 
-## Content
+## Content of the repository
 - README.md
 - BigLovasOriginal.txt
 - SmallLovasOriginal.txt
@@ -139,6 +139,8 @@ We will need a separte partition function file for this dataset, partition_funct
 After this the cat files will be in the catalog_hfs and the partition file ready to be ingested by MADCUBA. 
 
 ### Step 4 - Hitran
+
+
 
 
 
