@@ -3,6 +3,17 @@
 ## Introduction
 This repository aims to hold all the tools needed to populate the software MADCUBA (https://cab.inta-csic.es/madcuba/) and provide an overview in the process needed to regenerate the MADCUBA database.
 
+The MADCUBA database is a relational database based in hsqldb (https://hsqldb.org/) that is built from the cat files with the transition information for each species and the partition function file with information about the partition function for each molecule. The relational database is divided in catalogs and each catalog has two tables one for the transitions and another one for the partition function. 
+Once the database is generated in MADCUBA, 4 files are generated named:
+
+- lines.data (The actual data of the database)
+- lines.backup (A specific backup to be used by hsqldb)
+- lines.properties (metadata about the database files)
+- lines.script (DDL - Data Definition Language) scripts for the database. Scripts to generate an empty database with the current structure than then can be populated with the backup.
+
+In a regular version of MADCUBA these files needs to be stored in the directory MADCUBA_IJ/plugins/MADCUBA_IJ/catalog 
+The different versions of the database can be replaced on that directory seamless and the system will automatically pick up the changes.
+
 At the end of the README further insights would be provided to help with the inclusion of new databases.
 
 These instructions are aimed to be run in a Linux or Linux-based(Mac OS) environment. 
@@ -12,6 +23,7 @@ These instructions are aimed to be run in a Linux or Linux-based(Mac OS) environ
 - BigLovasOriginal.txt
 - SmallLovasOriginal.txt
 - SmallLovasOriginal_2003.txt
+- NOTES_DB.txt
 - CDMS
     - getCDMS.sh
     - modificados.txt
@@ -158,15 +170,25 @@ To run the generation of the database we need to execute that class as a java ap
 
 ## Additional notes on the management of the db
 
+There is included in this repository a legacy text file named NOTES_DB.txt with some information about how to connect to the database and work with it as you would do with any regular RDBMS. This infomation is completed and presented in the next point in this section. 
+There are then some useful queries that can be used to check the integrity of the database.
+
 ### Querying the db
+
+The library used in the codebase of MADCUBA to deal with relational databases HSQLDB, that is precisely hsqldb.jar has a built tool to interrogate the database, that is called DatabaseManager. 
+
+To use it we need to run the following command where the files for the database are located:
+
 java -cp ../MADCUBA/hsqldb.jar org.hsqldb.util.DatabaseManager
-setting config to jdbc:hsqldb:file:databaseName  (with no extension)
+The relative path would change and it needs to point where the library is located. 
 
-org.hsqldb.jdbcDriver
-jdbc:hsqldb:file:lines
+In the config screen that would apper we need to enter the following configuration
 
-java -cp /home/smartin/MADCUBA/MADCUBA_IJ/External\ Libraries/hsqldb.jar org.hsqldb.util.DatabaseManager
+config: jdbc:hsqldb:file:databaseName   (This is literally the word databaseName, it doesn't need to be replaced)
+driver: org.hsqldb.jdbcDriver
+database: jdbc:hsqldb:file:lines
 
+After that you will be connected to an interfaz where you can choose the catalog to query and write and run some queries. 
 
 ## TODO
 - Review which are the the files used for the hfs catalog. There is a number of errors in the website with the latest version of the hfs link being broken and therefore unable to use it. We have reported some of them and they are being fixed. We need to systematically go through all of them. 
