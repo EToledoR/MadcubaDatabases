@@ -1,0 +1,48 @@
+java -cp ../MADCUBA/hsqldb.jar org.hsqldb.util.DatabaseManager
+setting config to jdbc:hsqldb:file:databaseName  (with no extension)
+
+org.hsqldb.jdbcDriver
+jdbc:hsqldb:file:lines
+
+java -cp /home/smartin/MADCUBA/MADCUBA_IJ/External\ Libraries/hsqldb.jar org.hsqldb.util.DatabaseManager
+
+
+FROM LUCAS:
+
+var quote = "'";
+rename_molecule = quote+"ethanimine_Jg3"+quote;
+cond1 = "id_QN1>3";
+cond = quote+cond1+quote;
+run("SLIM Search", " range='selected_data' rename_molecule="+rename_molecule+" where="+cond+" axislabel='Frequency' axisunit='Hz' molecules='USER$Z-ethanimine_a_hf$Any$Any$Any$#' searchtype=new datafile='all_DATA_Jairo_FINAL_all.fits|Orig.' datatype=SPECTRA");
+
+
+TEST WITH DB MANAGER 
+USER DATABASE
+SELECT * FROM USERCAT WHERE id_formula='DCO'
+SELECT * FROM USERCAT WHERE id_formula='Z-ethanimine_a_hf'
+SELECT * FROM USERCAT WHERE id_tag=' 43600'
+SELECT * FROM USER WHERE id_tag=' 43600' AND id_qn1>3
+
+CDMS DATABASE
+SELECT * FROM CDMSCAT WHERE id_tag=' 38508'
+SELECT * FROM CDMS WHERE id_tag=' 38508' AND ID_QN1>2
+SELECT * FROM CDMS WHERE id_tag=' 38508' AND CAST(ID_QN1 as INTEGER)>2
+SELECT * FROM CDMS WHERE id_tag=' 28503' AND ID_QN1>2
+
+
+cond1 = "id_QN4=0 OR id_QN4=3 OR id_QN4=6";
+cond1 = "id_QN4=3";
+
+
+var quote = "'";
+rename_molecule = quote+"Amethanol"+quote;
+cond1 = "(id_QN4=0 or id_QN4=3 or id_QN4=6)";
+cond = quote+cond1+quote;
+run("SLIM Search", " range='selected_data' rename_molecule="+rename_molecule+" where="+cond+" axislabel='Frequency' axisunit='Hz' molecules='CDMS$CH3OH,vt=0-2$Any$300$Any$#' searchtype=new datafile='GenerateSpectra.fits|Orig.' datatype=SPECTRA");
+
+var quote = "'";
+rename_molecule = quote+"Emethanol"+quote;
+cond1 = "not (id_QN4=0 or id_QN4=3 or id_QN4=6)";
+cond = quote+cond1+quote;
+run("SLIM Search", " range='selected_data' rename_molecule="+rename_molecule+" where="+cond+" axislabel='Frequency' axisunit='Hz' molecules='CDMS$CH3OH,vt=0-2$Any$300$Any$#' searchtype=add datafile='GenerateSpectra.fits|Orig.' datatype=SPECTRA");
+
