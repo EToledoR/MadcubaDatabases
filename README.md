@@ -42,6 +42,9 @@ These instructions are aimed to be run in a Linux or Linux-based(Mac OS) environ
     - c017009.cat
 - LSD
     - getLILLE.ipynb
+- CDMSOP
+    - getpartition.py
+    - orthopara.py
 
 ## Datasets included
 At the moment of writing the first version of this README we are populating the databases with the following data sets:
@@ -56,6 +59,11 @@ At the moment of writing the first version of this README we are populating the 
     - [https://hitran.org/](https://hitran.org/)
 - **Lovas (Frank J. Lovas), Observed Interstellar Molecular Microwave transitions**
     - [https://www.nist.gov/pml/observed-interstellar-molecular-microwave-transitions](https://www.nist.gov/pml/observed-interstellar-molecular-microwave-transitions)
+ 
+  CDMS is the main catalogue for the Cologne Database for Molecular Spectroscopy but internally and for practical reasons we divide this datasets into three catalogues to be ingested into the MADCUBA database:
+  - CDMS; the main dataset with the species that one can see browsing the CDMS website. 
+  - CDMSHFS; a catalogue for the species that has separated transitions for the hyperfine structure. 
+  - CDMSOP; a catalogue for the species that has separated transitions for the ortho and par forms of the molecules.
 
 ## Procedure
 In order to be processed by MADCUBA this directory structure as it is displayed in the beginning of this README document needs to be replicated locally in the computer where you are running the MADCUBA database update. There should be an "umbrella directory" something like: /home/user/dbMADCUBA and underneath the directory structure presents here with all the files needed. 
@@ -158,6 +166,8 @@ For Hitran, we have four python scripts to be run in the follwing order:
 - getHITRAN.py A python script that using the HITRAN API download all the the .par files (Hitran format) for each of the molecules and its isotopoogues.
 - parsinghitrandata.py A python script that reads each of the par files of the previous step and for each of them generate a cat file (the format used by the other databases) with a similar name standard using as id an internal id used for HITRAN. A series of calculations and changes in the units are performed, all of them detailed inline in the python code.
 - movefiles.py A python script that arrange the data in the way that MADCUBA would expect it with a catalog directory with all the .cat files and a partition function file outside that folder.
+
+### Step 5 - CDMSOP
 
 After that the files will be ready to be ingested. 
 
