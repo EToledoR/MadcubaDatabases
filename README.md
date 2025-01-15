@@ -16,7 +16,7 @@ The different versions of the database can be replaced on that directory seamles
 
 At the end of the README further insights would be provided to help with the inclusion of new databases.
 
-These instructions are aimed to be run in a Linux or Linux-based(Mac OS) environment. 
+These instructions are aimed to be run in a Linux or Linux-based(including Mac OS) environment. 
 
 ## Content of the repository
 - README.md
@@ -63,16 +63,16 @@ At the moment of writing the first version of this README we are populating the 
   CDMS is the main catalogue for the Cologne Database for Molecular Spectroscopy but internally and for practical reasons we divide this datasets into three catalogues to be ingested into the MADCUBA database:
   - CDMS; the main dataset with the species that one can see browsing the CDMS website. 
   - CDMSHFS; a catalogue for the species that has separated transitions for the hyperfine structure. 
-  - CDMSOP; a catalogue for the species that has separated transitions for the ortho and par forms of the molecules.
+  - CDMSOP; a catalogue for the species that has separated transitions for the orth-o and para- forms of the molecules.
 
 ## Procedure
 In order to be processed by MADCUBA this directory structure as it is displayed in the beginning of this README document needs to be replicated locally in the computer where you are running the MADCUBA database update. There should be an "umbrella directory" something like: /home/user/dbMADCUBA and underneath the directory structure presents here with all the files needed. 
 
-The steps provided aiming to rerun the process without any need to clean or prepare the directory. The scripts will check for incremental changes in the datasets and update accordingly the needed files.
+The steps provided aiming to rerun the process without any need to clean or prepare the directory each time that the database needs to be refreshed as the catalogues are updated regularly. The scripts will check for incremental changes in the datasets and update accordingly the needed files.
 
 The files needed to process the data for the Lovas' databases are static and provided in this directory, there is nothing further to be done with them and the MADCUBA codebase is ready to ingest the files as they are.
 
-The order in which the datasets are retrieved does not affect the generation of the database in MADCUBA, the order provided in this README document is purely done to compile all the steps and give the person reading it a sense about how to to use the scripts and other tools in this README. However follow the order in which the different scripts are presented for each dataset is mandatory, as some of them are dependent on the output of the previous ones. 
+The order in which the datasets are retrieved does not affect the generation of the database in MADCUBA, the order provided in this README document is purely done to compile all the steps and give the person reading it a sense about how to to use the scripts and other tools in this README. However follow the order in which the different scripts are presented inside each dataset folder is mandatory, as some of them are dependent on the output of the previous ones. 
 
 ### Step 1 - JPL
 For JPL you just need to run the bash script getJPL.sh (you need to ensure beforehand that the script has execution permissions using the command chmod). 
@@ -117,7 +117,7 @@ In the case of LSD there is no need to add manual steps once the data is generat
 
 For CDMS we have these scripts:
 
-- getCDMS.sh  A bash script that create the directory structure that will be explained a bit later in this paragraph and download the partition function file and the cat files correspondent.
+- getCDMS.sh  A bash script that create the directory structure that will be explained a bit later in this section and download the partition function file and the cat files correspondent.
 - modificados.txt  A text file that , as previously in JPL, it contains a series of manual steps in order to fix issues in the partition function file or some of the cat files, mostly typos.
 - correctpartition.py A python script that complete the gaps in the partition function file. It retrieves the efiles (a series of html files, one per species with information about it including partition function information), complete possible gaps in the lines of the partition function file and then by interpolation and extrapolation complete all the gaps on the range of temperatures presented in the partition function file. As additional checks the script present a short report at the end of it with the number of lines modify and the reasons why they have been modified and it also generate two files with the ids of the species in each group: monotonyissues.txt, unalteredids.txt. The main output of this script is a file named outfile_partition_file.html.
 - checkpartition.py Is another python script, a small alteration of the previous one that generate a fake partition function with four lines per species: the original line from the partition function file that we have downloaded with getCDMS, another line with the data from the efiles in the case that we have them for the specifics temperatures in the partition function, the differences between both of them in percentage, and a forth line that represent the output of the species after filling the gaps and interpolate and extrapolate the missed data. The ouput of this script is a file named check_partition_function.html for review. Additionally and to help with the review, when the script runs there is a little report at the end that highlight the ids of the species that have a biger difference of a threshold (right now, it is the 5%). This script also generate a series of comparative plots stored in the directory catalog_partitioncorrection together with the efiles donwloaded. 
@@ -205,4 +205,4 @@ After that you will be connected to an interfaz where you can choose the catalog
 - Add documentation regading how to add new databases. Mainly the changes that we need to do in the MADCUBA codebase not only to include the database in the catalog but also so the new catalog is displayed in the combobox at the MADCUBA Gui. 
 - Allow multiple users databases.
 - Align queries for the Lovas databases with the other databases.
-- Add Lovas 2009 ctalog. 
+- Add Lovas 2009 catalog. 
