@@ -72,7 +72,7 @@ The steps provided aiming to rerun the process without any need to clean or prep
 
 The files needed to process the data for the Lovas' databases are static and provided in this directory, there is nothing further to be done with them and the MADCUBA codebase is ready to ingest the files as they are.
 
-The order in which the datasets are retrieved does not affect the generation of the database in MADCUBA, the order provided in this README document is purely done to compile all the steps and give the person reading it a sense about how to to use the scripts and other tools in this README. However follow the order in which the different scripts are presented inside each dataset folder is mandatory, as some of them are dependent on the output of the previous ones. 
+The order in which the datasets are retrieved does not affect the generation of the database in MADCUBA, the order provided in this README document is purely done to compile all the steps and give the person reading it a sense about how to to use the scripts and other tools in this README. There is an exception to this rule that is related to the CDMS subsets, the main dataset needs to be the first one as the datasets for HFS and ortho- and para- needs files that have been retrieved together with the first dataset. However follow the order in which the different scripts are presented inside each dataset folder is mandatory, as some of them are dependent on the output of the previous ones. 
 
 ### Step 1 - JPL
 For JPL you just need to run the bash script getJPL.sh (you need to ensure beforehand that the script has execution permissions using the command chmod). 
