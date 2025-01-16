@@ -1,16 +1,3 @@
-
-
-Eliminar de partition_function.html
-porque faltan funciones de particion.
-
-83503 - Si podemos vivir sin las dos mas bajas...modificar codigo?
- 83503 AG-n-C4H9CN               14427          ---          ---       4.9056       4.5040       3.8122       2.0784      -0.9367          ---          ---          ---          ---
- 45528 CH3C-13-HO,vt=0,1         28026          ---          ---       4.7207          ---       4.0783          ---          ---       4.2415       3.6553          ---          ---
- 45529 C-13-H3CHO,vt=0,1         28789          ---          ---       4.7278          ---       4.0858          ---          ---       4.2489       3.6632          ---          ---
- 49518 C-13-H3SH,v=0-2            9308          ---          ---       4.3736          ---       3.7719          ---          ---       3.9229       3.3824          ---          ---
- 35505 CD3OH, vt=0               14864          ---          ---       5.3591          ---       4.7493          ---          ---       4.8983          ---          ---          ---
- 35506 CD3OH, vt=1                9710          ---          ---       5.3591          ---       4.7493          ---          ---       4.8983          ---          ---          ---
-
 Change 
  45515 ethylamine, anti-conformer  3857          ---          ---       5.3544       5.1670       4.9029       4.4516       4.0006       3.5505       3.1017          ---          ---
 by
@@ -104,3 +91,17 @@ Eliminar el * de la tabla de particiones
 #mv c069509.cat c069509.backup
 #sed 's/60509/69509/g' c069509.backup > c069509.cat
 
+
+#Eliminar de partition_function.html
+#porque faltan funciones de particion.
+
+Eduardo Toledo (Ene 2025) Desde Dec 2024 esta modificación no es necesaria ya que se corre un segundo script, correctpartition.py, que completa los datos que faltan para 
+la partitio function file. 
+
+#83503 - Si podemos vivir sin las dos mas bajas...modificar codigo?
+ #83503 AG-n-C4H9CN               14427          ---          ---       4.9056       4.5040       3.8122       2.0784      -0.9367          ---          ---          ---          ---
+ #45528 CH3C-13-HO,vt=0,1         28026          ---          ---       4.7207          ---       4.0783          ---          ---       4.2415       3.6553          ---          ---
+ #45529 C-13-H3CHO,vt=0,1         28789          ---          ---       4.7278          ---       4.0858          ---          ---       4.2489       3.6632          ---          ---
+ #49518 C-13-H3SH,v=0-2            9308          ---          ---       4.3736          ---       3.7719          ---          ---       3.9229       3.3824          ---          ---
+ #35505 CD3OH, vt=0               14864          ---          ---       5.3591          ---       4.7493          ---          ---       4.8983          ---          ---          ---
+ #35506 CD3OH, vt=1                9710          ---          ---       5.3591          ---       4.7493          ---          ---       4.8983          ---          ---          ---
