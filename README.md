@@ -160,7 +160,7 @@ After this the cat files will be in the catalog_hfs and the partition file ready
 
 ### Step 4 - Hitran
 
-For Hitran, we have four python scripts to be run in the follwing order:
+For Hitran, we have four python scripts to be run in the follwing order (python3 xxxx.py):
 
 - partitionfunctiontohtml.py A python script that read from the HITRAN database website the information and generate a file following the exact same format as the ones used by CDMS, JPL and Lille.
 - getHITRAN.py A python script that using the HITRAN API download all the the .par files (Hitran format) for each of the molecules and its isotopoogues.
