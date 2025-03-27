@@ -4,18 +4,18 @@ from hapi import *
 mol_id = ['1 = H2O','2 = CO2','3 = O3','4 = N2O','5 = CO','6 = CH4','7 = O2',
 '8 = NO','9 = SO2','10 = NO2','11 = NH3','12 = HNO3','13 = OH','14 = HF','15 = HCl',
 '16 = HBr','17 = HI','18 = ClO','19 = OCS','20 = H2CO','21 = HOCl','22 = N2','23 = HCN',
-'24 = CH3Cl','25 = H2O2','26 = C2H2','27 = C2H6','28 = PH3','29 = COF2','30 = SF6','31 = H2S',
-'32 = HCOOH','33 = HO2','no 34     ','35 = ClONO2','36 = NO+','37 = HOBr','38 = C2H4','39 = CH3OH',
-'40 = CH3Br','41 = CH3CN','42 = CF4','43 = C4H2','44 = HC3N','45 = H2','46 = CS','47 = SO3','48=C2N2',
-'49=COCl2','50=SO','51=CH3F','52=GeH4','53=CS2','54=CH3I','55=NF3','56=C3H4','57=CH3',]
+'24 = CH3Cl','25 = H2O2','26 = C2H2','27 = C2H6','28 = PH3','29 = COF2','31 = H2S',
+'32 = HCOOH','33 = HO2','no 34     ','36 = NO+','37 = HOBr','38 = C2H4','39 = CH3OH',
+'40 = CH3Br','41 = CH3CN','43 = C4H2','44 = HC3N','45 = H2','46 = CS','47 = SO3','48=C2N2',
+'49=COCl2','50=SO','51=CH3F','52=GeH4','53=CS2','54=CH3I','56=C3H4','57=CH3',]
 
 molecules = [' ','H2O   ','CO2   ','O3    ','N2O   ','CO    ','CH4   ','O2    ',
 'NO    ','SO2   ','NO2   ','NH3   ','HNO3  ','OH    ','HF    ','HCl   ',
 'HBr   ','HI    ','ClO   ','OCS   ','H2CO  ','HOCl  ','N2    ','HCN   ',
-'CH3Cl ','H2O2  ','C2H2  ','C2H6  ','PH3   ','COF2  ','SF6   ','H2S   ',
-'HCOOH ','HO2   ','O     ','ClONO2','NO+   ','HOBr  ','C2H4  ','CH3OH ',
-'CH3Br ','CH3CN ','CF4   ','C4H2  ','HC3N  ','H2    ','CS    ','SO3   ','C2N2  ', 
-'COCl2 ','SO    ','CH3F  ','GeH4  ','CS2   ','CH3I   ','NF3    ','C3H4  ','CH3   ']
+'CH3Cl ','H2O2  ','C2H2  ','C2H6  ','PH3   ','COF2  ','H2S   ',
+'HCOOH ','HO2   ','O     ','NO+   ','HOBr  ','C2H4  ','CH3OH ',
+'CH3Br ','CH3CN ','C4H2  ','HC3N  ','H2    ','CS    ','SO3   ','C2N2  ', 
+'COCl2 ','SO    ','CH3F  ','GeH4  ','CS2   ','CH3I   ','C3H4  ','CH3   ']
 
 niso = [0,7,12,5,5,6,4,3,3,4,2,2,2,
 3,2,4,4,2,2,6,3,2,3,3,2,1,3,3,1,
@@ -142,30 +142,31 @@ for val in mol_id:
         mol_n = mol_num.strip();
         print(mol_num);
         mol_num = int(mol_num);
-        print (isotopologue[mol_num])
-        mol_name = val.split('=')[1].strip();
-        iso_list = isotopologue[mol_num].split(',');
-        for iso in iso_list:
-            count_iso = iso.count("=");
-            print('test')
-            if count_iso != 0:
-                print('test1')
-                iso_num = iso.split('=')[0];
-                print(iso_num);
-                iso_n = iso_num.strip();
-                iso_num = int(iso_num);
-                global_id = iso.split('=')[1]
-                print(global_id)
-                global_id = global_id.strip()
-                global_id = int(global_id)
-                output_directory = 'data/'
-                os.makedirs(output_directory, exist_ok=True)
-                print('data/' + mol_name + '_' + iso_n)
-                #print('data/' + mol_name + '_' + iso_n)
-                db_begin('data/' + mol_name + '_' + iso_n);
-                #print('test2')
-                #print(mol_name + str(iso_num))
-                fetch_by_ids(mol_name,[global_id],0,100000);
+        if mol_num < len(isotopologue):
+            print (isotopologue[mol_num])
+            mol_name = val.split('=')[1].strip();
+            iso_list = isotopologue[mol_num].split(',');
+            for iso in iso_list:
+                count_iso = iso.count("=");
+                print('test')
+                if count_iso != 0:
+                    print('test1')
+                    iso_num = iso.split('=')[0];
+                    print(iso_num);
+                    iso_n = iso_num.strip();
+                    iso_num = int(iso_num);
+                    global_id = iso.split('=')[1]
+                    print(global_id)
+                    global_id = global_id.strip()
+                    global_id = int(global_id)
+                    output_directory = 'data/'
+                    os.makedirs(output_directory, exist_ok=True)
+                    print('data/' + mol_name + '_' + iso_n)
+                    #print('data/' + mol_name + '_' + iso_n)
+                    db_begin('data/' + mol_name + '_' + iso_n);
+                    #print('test2')
+                    #print(mol_name + str(iso_num))
+                    fetch_by_ids(mol_name,[global_id],0,100000);
 
 
 
