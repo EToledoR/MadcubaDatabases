@@ -1,16 +1,3 @@
-
-
-Eliminar de partition_function.html
-porque faltan funciones de particion.
-
-83503 - Si podemos vivir sin las dos mas bajas...modificar codigo?
- 83503 AG-n-C4H9CN               14427          ---          ---       4.9056       4.5040       3.8122       2.0784      -0.9367          ---          ---          ---          ---
- 45528 CH3C-13-HO,vt=0,1         28026          ---          ---       4.7207          ---       4.0783          ---          ---       4.2415       3.6553          ---          ---
- 45529 C-13-H3CHO,vt=0,1         28789          ---          ---       4.7278          ---       4.0858          ---          ---       4.2489       3.6632          ---          ---
- 49518 C-13-H3SH,v=0-2            9308          ---          ---       4.3736          ---       3.7719          ---          ---       3.9229       3.3824          ---          ---
- 35505 CD3OH, vt=0               14864          ---          ---       5.3591          ---       4.7493          ---          ---       4.8983          ---          ---          ---
- 35506 CD3OH, vt=1                9710          ---          ---       5.3591          ---       4.7493          ---          ---       4.8983          ---          ---          ---
-
 Change 
  45515 ethylamine, anti-conformer  3857          ---          ---       5.3544       5.1670       4.9029       4.4516       4.0006       3.5505       3.1017          ---          ---
 by
@@ -35,15 +22,6 @@ en todos
  60525 CH3COOH, vt=2             76890       6.4270       5.8118       5.3526       5.0882       4.7107       4.0620       3.5352       3.0552       2.5982       2.1480       1.4765       
  60526 CH3COOH, Dvt<>0           87669       6.4270       5.8118       5.3526       5.0882       4.7107       4.0620       3.5352       3.0552       2.5982       2.1480       1.4765       
 
- 
-Reemplazar (error en ID)
- 47527 trans-HONO                10675          ---          ---       4.1043       3.8920       3.5852       3.0516       2.5471       2.0869       1.6391       1.2369       0.8568
- 47527 cis-HONO                   8913          ---          ---       4.1043       3.8920       3.5852       3.0516       2.5471       2.0869       1.6391       1.2369       0.8568
-por 
- 47527 trans-HONO                10675          ---          ---       4.1043       3.8920       3.5852       3.0516       2.5471       2.0869       1.6391       1.2369       0.8568
- 47528 cis-HONO                   8913          ---          ---       4.1043       3.8920       3.5852       3.0516       2.5471       2.0869       1.6391       1.2369       0.8568
- 
-
 Extra spaces in this one 17506 NH3-wHFS
 mv c017506.cat c017506.backup
 sed 's/             /     /g' c017506.backup > c017506.cat
@@ -51,6 +29,7 @@ sed 's/             /     /g' c017506.backup > c017506.cat
 Extra spaces needed to ensure consistency with line length constrains
 mv c012501.cat c012501.backup
 sed -e 's/1           0/1           0          /g' -e 's/2           1/2           1          /g' c012501.backup > c012501.cat
+
 
 Wrong ID: This molecule HC(S-34)CN, should actually be 72507!!! Check if this is corrected in future catalog versions. --- CREO QUE YA SE CORRIGIO EL Sep 2, 2021.
 mv c073506.cat c073506.backup
@@ -104,3 +83,25 @@ Eliminar el * de la tabla de particiones
 #mv c069509.cat c069509.backup
 #sed 's/60509/69509/g' c069509.backup > c069509.cat
 
+
+#Eliminar de partition_function.html
+#porque faltan funciones de particion.
+
+Eduardo Toledo (Ene 2025) Desde Dec 2024 esta modificación no es necesaria ya que se corre un segundo script, correctpartition.py, que completa los datos que faltan para 
+la partitio function file. 
+
+#83503 - Si podemos vivir sin las dos mas bajas...modificar codigo?
+ #83503 AG-n-C4H9CN               14427          ---          ---       4.9056       4.5040       3.8122       2.0784      -0.9367          ---          ---          ---          ---
+ #45528 CH3C-13-HO,vt=0,1         28026          ---          ---       4.7207          ---       4.0783          ---          ---       4.2415       3.6553          ---          ---
+ #45529 C-13-H3CHO,vt=0,1         28789          ---          ---       4.7278          ---       4.0858          ---          ---       4.2489       3.6632          ---          ---
+ #49518 C-13-H3SH,v=0-2            9308          ---          ---       4.3736          ---       3.7719          ---          ---       3.9229       3.3824          ---          ---
+ #35505 CD3OH, vt=0               14864          ---          ---       5.3591          ---       4.7493          ---          ---       4.8983          ---          ---          ---
+ #35506 CD3OH, vt=1                9710          ---          ---       5.3591          ---       4.7493          ---          ---       4.8983          ---          ---          ---
+
+Esto ya no es necesario hacerlo, en las últimas descargas ya esta corregido
+#Reemplazar (error en ID)
+# 47527 trans-HONO                10675          ---          ---       4.1043       3.8920       3.5852       3.0516       2.5471       2.0869       1.6391       1.2369       0.8568
+# 47527 cis-HONO                   8913          ---          ---       4.1043       3.8920       3.5852       3.0516       2.5471       2.0869       1.6391       1.2369       0.8568
+#por 
+# 47527 trans-HONO                10675          ---          ---       4.1043       3.8920       3.5852       3.0516       2.5471       2.0869       1.6391       1.2369       0.8568
+# 47528 cis-HONO                   8913          ---          ---       4.1043       3.8920       3.5852       3.0516       2.5471       2.0869       1.6391       1.2369       0.8568
