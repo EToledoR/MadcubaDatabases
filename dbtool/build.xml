@@ -1,0 +1,35 @@
+<project name="madcuba-dbtool" default="fatjar" basedir=".">
+  <property name="src.dir" value="src"/>
+  <property name="build.dir" value="out"/>
+  <property name="dist.dir" value="dist"/>
+
+  <path id="lib.path">
+    <fileset dir="lib" includes="**/*.jar"/>
+  </path>
+
+  <target name="clean">
+    <delete dir="${build.dir}"/>
+    <delete dir="${dist.dir}"/>
+  </target>
+
+  <target name="compile">
+    <mkdir dir="${build.dir}"/>
+    <javac srcdir="${src.dir}" destdir="${build.dir}"
+           includeantruntime="false" source="1.8" target="1.8" debug="true">
+      <classpath refid="lib.path"/>
+    </javac>
+  </target>
+
+  <target name="fatjar" depends="compile">
+    <mkdir dir="${dist.dir}"/>
+    <jar destfile="${dist.dir}/madcuba-dbtool-standalone.jar">
+      <manifest>
+        <attribute name="Main-Class" value="es.smr.slim.DbHSQLDBCreateCLI"/>
+      </manifest>
+      <fileset dir="${build.dir}"/>
+      <zipgroupfileset dir="lib" includes="**/*.jar"/>
+    </jar>
+    <echo>Creado: ${dist.dir}/madcuba-dbtool-standalone.jar</echo>
+  </target>
+</project>
+
