@@ -92,6 +92,8 @@ Once this data is populated is time to manually execute all the changes compiled
 One of the manual fixes in the modificados text file is to move an old cat file that is no longer in the latest versions of the JPL catalog, c017009.cat. This file is also included in this repository as one of the tools to generate the db.
 
 ### Step 2 - LSD
+(Note Oct 2025): In order to run the notebook, it is needed to install jupyter notebook (this can be done using pip, the python package installer, pip3 install notebook) and also some libraries are needed: wget, numpy and matplotlib (again these can be installed using pip).
+
 By executing the jupyter notebook named getLILLE.ipynb we got in this order:
 
 - A file named entries (a JSON object description).
