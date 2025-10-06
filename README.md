@@ -76,6 +76,7 @@ The order in which the datasets are retrieved does not affect the generation of 
 
 ### Step 1 - JPL
 For JPL you just need to run the bash script getJPL.sh (you need to ensure beforehand that the script has execution permissions using the command chmod). 
+Note (Oct 2025): In MacOS the command wget doesn't seem to be installaed by default, and in order to run this script this tool needs to be installed. That can be achieved in various ways, a common one is using brew: 'brew install wget'.
 The execution of that script will create the following directory structure inside the JPL directory:
 
 - JPL
