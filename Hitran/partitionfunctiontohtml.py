@@ -108,7 +108,7 @@ def get_qfiles():
         with open(file_path, 'wb') as output:
             output.write(r.content)
 
-#get_qfiles()
+get_qfiles()
 
 # Function for linear interpolation
 def interpolate(x, x0, y0, x1, y1):
