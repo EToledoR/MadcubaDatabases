@@ -59,7 +59,10 @@ with open('partition_function.html', 'r') as infile:
 # Loop to get all the efiles for the species in the partition
 # function file
 for fpartitionline in fpartitionlines[15:]:
-    if "<" not in fpartitionline:
+    # Eduardo Toledo Oct 2025
+    # Error getting all the efiles
+    #if "<" not in fpartitionline:
+    if not fpartitionline.startswith("<"):
         fpartitioncode = fpartitionline[0:6].replace("  ","00").replace(" ","0")
         if fpartitioncode.strip() != "":
             filepath = f'./catalog_partitioncorrection/e{fpartitioncode}.cat'
