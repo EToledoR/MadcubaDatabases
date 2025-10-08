@@ -173,6 +173,10 @@ For Hitran, we have four python scripts to be run in the follwing order (python3
 
 ### Step 5 - CDMSOP
 
+- getpartion.py
+- orthopara.py
+
+The correct order to run the scripts is first getpartition.py and then orthopara.py because the second makes use of the output data of the first one. 
 After that the files will be ready to be ingested. 
 
 ## The DBHSLQDBCreate.java class in MADCUBA codebase and how to regenerate the database
