@@ -210,7 +210,7 @@ After that you will be connected to an interfaz where you can choose the catalog
 
 ## TODO
 - Review which are the the files used for the hfs catalog. There is a number of errors in the website with the latest version of the hfs link being broken and therefore unable to use it. We have reported some of them and they are being fixed. We need to systematically go through all of them. 
-- Add documentation regading how to add new databases. Mainly the changes that we need to do in the MADCUBA codebase not only to include the database in the catalog but also so the new catalog is displayed in the combobox at the MADCUBA Gui. 
+- Add documentation regarding how to add new databases. Mainly the changes that we need to do in the MADCUBA codebase not only to include the database in the catalog but also so the new catalog is displayed in the combobox at the MADCUBA Gui. 
 - Allow multiple users databases.
 - Align queries for the Lovas databases with the other databases.
 - Add Lovas 2009 catalog. 
