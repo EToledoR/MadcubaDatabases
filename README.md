@@ -104,7 +104,7 @@ By executing the jupyter notebook named getLILLE.ipynb we got in this order:
 - And outside of the catalog folder a partition function file generated with the data unzipped from the previous steps.
 
 - LSD
-    - *.cat.zip files
+    - *.zip files
     - entries
     - entries.bck
     - getLILLE.ipynb
@@ -122,6 +122,7 @@ For CDMS we have these scripts:
 
 - getCDMS.sh  A bash script that create the directory structure that will be explained a bit later in this section and download the partition function file and the cat files correspondent.
 - modificados.txt  A text file that , as previously in JPL, it contains a series of manual steps in order to fix issues in the partition function file or some of the cat files, mostly typos.
+  In modificados we have a series of modifications that needs to be done directly in the partition file, the changes applied to: 45515, 90502, 60523, 60524, 60525, 60526. Then, there are some of them that applies to the specific catfiles: c017506, c012501, c073506, c045531, c047526, c059516. At the end of the file there is a historical of the solved issues. 
 - correctpartition.py A python script that complete the gaps in the partition function file. It retrieves the efiles (a series of html files, one per species with information about it including partition function information), complete possible gaps in the lines of the partition function file and then by interpolation and extrapolation complete all the gaps on the range of temperatures presented in the partition function file. As additional checks the script present a short report at the end of it with the number of lines modify and the reasons why they have been modified and it also generate two files with the ids of the species in each group: monotonyissues.txt, unalteredids.txt. The main output of this script is a file named outfile_partition_file.html.
 - checkpartition.py Is another python script, a small alteration of the previous one that generate a fake partition function with four lines per species: the original line from the partition function file that we have downloaded with getCDMS, another line with the data from the efiles in the case that we have them for the specifics temperatures in the partition function, the differences between both of them in percentage, and a forth line that represent the output of the species after filling the gaps and interpolate and extrapolate the missed data. The ouput of this script is a file named check_partition_function.html for review. Additionally and to help with the review, when the script runs there is a little report at the end that highlight the ids of the species that have a biger difference of a threshold (right now, it is the 5%). This script also generate a series of comparative plots stored in the directory catalog_partitioncorrection together with the efiles donwloaded. 
 
