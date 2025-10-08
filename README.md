@@ -106,7 +106,7 @@ By executing the jupyter notebook named getLILLE.ipynb we got in this order:
 - LSD
     - *.zip files
     - entries
-    - entries.bck
+    - entries.bck (Only when the notebook has been previously executed)
     - getLILLE.ipynb
     - partition_function.html
     - catalog
